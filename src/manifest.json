@@ -1,0 +1,32 @@
+{
+  "package": "com.orange.l3bmax",
+  "name": "L3b Max",
+  "versionName": "1.0.0",
+  "versionCode": 1,
+  "icon": "/Common/logo.png",
+  "minPlatformVersion": 1060,
+  "features": [],
+  "config": {},
+  "router": {
+    "entry": "Splash",
+    "pages": {
+      "Splash": {
+        "component": "splash"
+      },
+      "Hello": {
+        "component": "hello"
+      }
+    }
+  },
+  "display": {
+    "pages": {
+      "Splash": {
+        "titleBarText": "Maxit",
+        "titleBar": false
+      },
+      "Hello": {
+        "titleBarText": "L3bMax Avec Maxit"
+      }
+    }
+  }
+}

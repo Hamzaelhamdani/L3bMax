@@ -1,0 +1,239 @@
+<template>
+  <div class="container">
+    <text class="title">L3bMax Avec Maxit</text>
+    <text class="status">{{ statusText }}</text>
+    <text class="winner" if="{{ winner }}">{{ winnerText }}</text>
+    
+    <div class="game-board">
+      <div class="row">
+        <div class="cell" onclick="makeMove(0, 0)" class="{{ board[0][0] ? 'filled' : '' }}">
+          <text class="cell-text">{{ board[0][0] }}</text>
+        </div>
+        <div class="cell" onclick="makeMove(0, 1)" class="{{ board[0][1] ? 'filled' : '' }}">
+          <text class="cell-text">{{ board[0][1] }}</text>
+        </div>
+        <div class="cell" onclick="makeMove(0, 2)" class="{{ board[0][2] ? 'filled' : '' }}">
+          <text class="cell-text">{{ board[0][2] }}</text>
+        </div>
+      </div>
+      <div class="row">
+        <div class="cell" onclick="makeMove(1, 0)" class="{{ board[1][0] ? 'filled' : '' }}">
+          <text class="cell-text">{{ board[1][0] }}</text>
+        </div>
+        <div class="cell" onclick="makeMove(1, 1)" class="{{ board[1][1] ? 'filled' : '' }}">
+          <text class="cell-text">{{ board[1][1] }}</text>
+        </div>
+        <div class="cell" onclick="makeMove(1, 2)" class="{{ board[1][2] ? 'filled' : '' }}">
+          <text class="cell-text">{{ board[1][2] }}</text>
+        </div>
+      </div>
+      <div class="row">
+        <div class="cell" onclick="makeMove(2, 0)" class="{{ board[2][0] ? 'filled' : '' }}">
+          <text class="cell-text">{{ board[2][0] }}</text>
+        </div>
+        <div class="cell" onclick="makeMove(2, 1)" class="{{ board[2][1] ? 'filled' : '' }}">
+          <text class="cell-text">{{ board[2][1] }}</text>
+        </div>
+        <div class="cell" onclick="makeMove(2, 2)" class="{{ board[2][2] ? 'filled' : '' }}">
+          <text class="cell-text">{{ board[2][2] }}</text>
+        </div>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <input type="button" value="New Game" onclick="resetGame" class="reset-btn" />
+    </div>
+  </div>
+</template>
+
+<style>
+  .container {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 20px;
+    background-color: #FFFFFF;
+  }
+
+  .title {
+    font-size: 42px;
+    font-weight: bold;
+    color: #FF7900;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .status {
+    font-size: 22px;
+    color: #000000;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+
+  .winner {
+    font-size: 26px;
+    color: #FF7900;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .game-board {
+    width: 300px;
+    height: 300px;
+    background-color: #000000;
+    flex-direction: column;
+    margin-bottom: 30px;
+  }
+
+  .row {
+    flex: 1;
+    flex-direction: row;
+  }
+
+  .cell {
+    flex: 1;
+    background-color: #FFFFFF;
+    border: 3px solid #000000;
+    justify-content: center;
+    align-items: center;
+    margin: 2px;
+  }
+
+  .cell:active {
+    background-color: #FFE6CC;
+  }
+
+  .filled {
+    background-color: #FFE6CC;
+  }
+
+  .cell-text {
+    font-size: 48px;
+    font-weight: bold;
+    color: #FF7900;
+  }
+
+  .controls {
+    margin-top: 20px;
+  }
+
+  .reset-btn {
+    width: 220px;
+    height: 55px;
+    background-color: #FF7900;
+    color: #FFFFFF;
+    font-size: 18px;
+    border-radius: 8px;
+    font-weight: bold;
+  }
+</style>
+
+<script>
+  module.exports = {
+    data: {
+      board: [
+        ['', '', ''],
+        ['', '', ''],
+        ['', '', '']
+      ],
+      currentPlayer: 'X',
+      winner: null,
+      gameOver: false,
+      statusText: "Player X's Turn",
+      winnerText: ''
+    },
+    onInit() {
+      this.$page.setTitleBar({
+        text: 'L3bMax Avec Maxit',
+        textColor: '#ffffff',
+        backgroundColor: '#FF7900',
+        backgroundOpacity: 0.9,
+        menu: true
+      });
+      this.updateStatusText();
+    },
+    updateStatusText() {
+      if (this.winner) {
+        if (this.winner === 'draw') {
+          this.winnerText = "It's a Draw!";
+        } else {
+          this.winnerText = this.winner + " Wins!";
+        }
+        this.statusText = "Game Over";
+      } else {
+        this.statusText = "Player " + this.currentPlayer + "'s Turn";
+      }
+    },
+    makeMove(row, col) {
+      if (this.gameOver || this.board[row][col] !== '') {
+        return;
+      }
+
+      // Make the move
+      this.board[row][col] = this.currentPlayer;
+      
+      // Check for winner
+      if (this.checkWinner()) {
+        this.winner = this.currentPlayer;
+        this.gameOver = true;
+      } else if (this.isBoardFull()) {
+        this.winner = 'draw';
+        this.gameOver = true;
+      } else {
+        // Switch player
+        this.currentPlayer = this.currentPlayer === 'X' ? 'O' : 'X';
+      }
+      
+      this.updateStatusText();
+    },
+    checkWinner() {
+      const board = this.board;
+      const player = this.currentPlayer;
+      
+      // Check rows
+      for (let i = 0; i < 3; i++) {
+        if (board[i][0] === player && board[i][1] === player && board[i][2] === player) {
+          return true;
+        }
+      }
+      
+      // Check columns
+      for (let j = 0; j < 3; j++) {
+        if (board[0][j] === player && board[1][j] === player && board[2][j] === player) {
+          return true;
+        }
+      }
+      
+      // Check diagonals
+      if ((board[0][0] === player && board[1][1] === player && board[2][2] === player) ||
+          (board[0][2] === player && board[1][1] === player && board[2][0] === player)) {
+        return true;
+      }
+      
+      return false;
+    },
+    isBoardFull() {
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          if (this.board[i][j] === '') {
+            return false;
+          }
+        }
+      }
+      return true;
+    },
+    resetGame() {
+      this.board = [
+        ['', '', ''],
+        ['', '', ''],
+        ['', '', '']
+      ];
+      this.currentPlayer = 'X';
+      this.winner = null;
+      this.gameOver = false;
+      this.winnerText = '';
+      this.updateStatusText();
+    }
+  }
+</script>

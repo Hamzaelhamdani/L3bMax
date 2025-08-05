@@ -1,0 +1,178 @@
+<template>
+  <div class="splash-container">
+    <!-- Background with Orange Gradient -->
+    <div class="background-gradient"></div>
+    
+    <!-- Main Logo Container -->
+    <div class="logo-container">
+      <!-- Max it Logo -->
+      <div class="logo-text-container">
+        <text class="logo-max">Max</text>
+        <text class="logo-it">it</text>
+      </div>
+      
+      <!-- MA Text at bottom -->
+      <text class="logo-ma">MA</text>
+    </div>
+    
+    <!-- Loading Animation -->
+    <div class="loading-container">
+      <div class="loading-dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <text class="loading-text">Loading L3bMax...</text>
+    </div>
+    
+    <!-- Version Info -->
+    <div class="version-info">
+      <text class="version-text">v1.0.0</text>
+      <text class="copyright">© Orange Telecom</text>
+    </div>
+  </div>
+</template>
+
+<style>
+  .splash-container {
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .background-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #FF7900;
+  }
+
+  .logo-container {
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-bottom: 80px;
+  }
+
+  .logo-text-container {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .logo-max {
+    font-size: 72px;
+    font-weight: bold;
+    color: #FFFFFF;
+    font-family: Arial, sans-serif;
+  }
+
+  .logo-it {
+    font-size: 72px;
+    font-weight: bold;
+    color: #000000;
+    font-family: Arial, sans-serif;
+    margin-left: 8px;
+  }
+
+  .logo-ma {
+    font-size: 48px;
+    font-weight: bold;
+    color: #000000;
+    font-family: Arial, sans-serif;
+    text-align: center;
+  }
+
+  .loading-container {
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 60px;
+  }
+
+  .loading-dots {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 6px;
+    background-color: #FFFFFF;
+    margin: 0 4px;
+    opacity: 0.8;
+  }
+
+  .loading-text {
+    font-size: 18px;
+    color: #FFFFFF;
+    font-weight: 500;
+  }
+
+  .version-info {
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .version-text {
+    font-size: 14px;
+    color: #FFFFFF;
+    opacity: 0.8;
+    margin-bottom: 5px;
+  }
+
+  .copyright {
+    font-size: 12px;
+    color: #FFFFFF;
+    opacity: 0.7;
+  }
+</style>
+
+<script>
+  module.exports = {
+    data: {
+      isLoading: true
+    },
+    onInit() {
+      console.info('Splash Screen - Maxit Logo Loading');
+      
+      // Hide title bar for immersive experience
+      this.$page.setTitleBar({
+        text: '',
+        backgroundColor: '#FF7900',
+        backgroundOpacity: 0,
+        menu: false
+      });
+      
+      // Auto-navigate to game after 3 seconds
+      setTimeout(() => {
+        this.navigateToGame();
+      }, 3000);
+    },
+    
+    navigateToGame() {
+      console.info('Navigating to L3bMax Game');
+      this.$app.router.push({
+        uri: '/Hello'
+      });
+    },
+    
+    onShow() {
+      console.info('Splash Screen Shown');
+    },
+    
+    onHide() {
+      console.info('Splash Screen Hidden');
+    }
+  }
+</script>
