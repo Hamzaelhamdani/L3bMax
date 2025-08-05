@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Roll - L3bMax</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #000, #1a1a1a);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: 28px;
+            color: #FF7900;
+            margin-bottom: 30px;
+        }
+
+        .dice-container {
+            margin: 40px 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .dice {
+            width: 80px;
+            height: 80px;
+            background-color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            border: 3px solid #FF7900;
+        }
+
+        .dice.rolling {
+            animation: diceRoll 1s ease-in-out;
+        }
+
+        @keyframes diceRoll {
+            0%, 100% { transform: rotateX(0deg) rotateY(0deg); }
+            25% { transform: rotateX(90deg) rotateY(90deg); }
+            50% { transform: rotateX(180deg) rotateY(180deg); }
+            75% { transform: rotateX(270deg) rotateY(270deg); }
+        }
+
+        .dice:hover:not(.rolling) {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 121, 0, 0.5);
+        }
+
+        .dice-controls {
+            margin-bottom: 30px;
+        }
+
+        .dice-count-selector {
+            margin-bottom: 20px;
+        }
+
+        .dice-count-selector label {
+            font-size: 16px;
+            color: #FF7900;
+            margin-right: 15px;
+        }
+
+        .dice-count-btn {
+            padding: 8px 15px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .dice-count-btn.active {
+            background-color: #FF7900;
+        }
+
+        .dice-count-btn:hover {
+            background-color: #555;
+        }
+
+        .dice-count-btn.active:hover {
+            background-color: #e66900;
+        }
+
+        .roll-btn {
+            padding: 15px 40px;
+            background: linear-gradient(45deg, #FF7900, #e66900);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .roll-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 121, 0, 0.4);
+        }
+
+        .roll-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-section {
+            margin-bottom: 30px;
+        }
+
+        .result-total {
+            font-size: 36px;
+            font-weight: bold;
+            color: #FF7900;
+            margin-bottom: 10px;
+        }
+
+        .result-individual {
+            font-size: 16px;
+            color: #CCCCCC;
+            margin-bottom: 20px;
+        }
+
+        .result-message {
+            font-size: 18px;
+            min-height: 25px;
+            color: #00ff88;
+        }
+
+        .stats-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #1a1a1a;
+            border-radius: 10px;
+        }
+
+        .stats-title {
+            font-size: 18px;
+            color: #FF7900;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background-color: #333;
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #CCCCCC;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #FF7900;
+        }
+
+        .probability-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #333;
+            border-radius: 8px;
+        }
+
+        .probability-title {
+            font-size: 16px;
+            color: #FF7900;
+            margin-bottom: 10px;
+        }
+
+        .probability-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background-color: #777;
+        }
+
+        .dice-history {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #333;
+            border-radius: 8px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .history-title {
+            font-size: 14px;
+            color: #FF7900;
+            margin-bottom: 10px;
+        }
+
+        .history-item {
+            font-size: 12px;
+            color: #CCCCCC;
+            margin-bottom: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">🎲 Dice Roll</h1>
+        
+        <div class="dice-controls">
+            <div class="dice-count-selector">
+                <label>Nombre de dés:</label>
+                <button class="dice-count-btn active" onclick="setDiceCount(1)">1</button>
+                <button class="dice-count-btn" onclick="setDiceCount(2)">2</button>
+                <button class="dice-count-btn" onclick="setDiceCount(3)">3</button>
+                <button class="dice-count-btn" onclick="setDiceCount(4)">4</button>
+            </div>
+        </div>
+
+        <div class="dice-container" id="diceContainer"></div>
+
+        <button class="roll-btn" id="rollBtn" onclick="rollDice()">
+            🎲 Lancer les Dés!
+        </button>
+
+        <div class="result-section">
+            <div class="result-total" id="resultTotal">0</div>
+            <div class="result-individual" id="resultIndividual">Cliquez pour lancer les dés</div>
+            <div class="result-message" id="resultMessage"></div>
+        </div>
+
+        <div class="stats-section">
+            <div class="stats-title">📊 Statistiques</div>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Lancers Totaux</div>
+                    <div class="stat-value" id="totalRolls">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Somme Moyenne</div>
+                    <div class="stat-value" id="averageSum">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Plus Haut</div>
+                    <div class="stat-value" id="highestRoll">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Plus Bas</div>
+                    <div class="stat-value" id="lowestRoll">-</div>
+                </div>
+            </div>
+
+            <div class="probability-section">
+                <div class="probability-title">Probabilités des sommes</div>
+                <div id="probabilityList"></div>
+            </div>
+
+            <div class="dice-history">
+                <div class="history-title">Historique (10 derniers)</div>
+                <div id="historyList"></div>
+            </div>
+
+            <div class="control-buttons">
+                <button class="control-btn" onclick="resetStats()">Reset Stats</button>
+                <button class="control-btn" onclick="showAnalytics()">Analyse</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDiceCount = 1;
+        let isRolling = false;
+        let currentRoll = [];
+        let stats = {
+            totalRolls: parseInt(localStorage.getItem('diceRolls')) || 0,
+            sumTotal: parseInt(localStorage.getItem('diceSumTotal')) || 0,
+            highestRoll: parseInt(localStorage.getItem('diceHighest')) || 0,
+            lowestRoll: parseInt(localStorage.getItem('diceLowest')) || 999,
+            rollHistory: JSON.parse(localStorage.getItem('diceHistory')) || []
+        };
+
+        const diceValues = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+
+        function setDiceCount(count) {
+            if (isRolling) return;
+            
+            currentDiceCount = count;
+            
+            // Update button states
+            document.querySelectorAll('.dice-count-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            createDice();
+            updateProbabilities();
+        }
+
+        function createDice() {
+            const container = document.getElementById('diceContainer');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < currentDiceCount; i++) {
+                const dice = document.createElement('div');
+                dice.className = 'dice';
+                dice.textContent = diceValues[0]; // Start with 1
+                dice.id = `dice${i}`;
+                container.appendChild(dice);
+            }
+        }
+
+        function rollDice() {
+            if (isRolling) return;
+            
+            isRolling = true;
+            document.getElementById('rollBtn').disabled = true;
+            document.getElementById('resultMessage').textContent = '';
+            
+            const diceElements = document.querySelectorAll('.dice');
+            
+            // Add rolling animation
+            diceElements.forEach(dice => {
+                dice.classList.add('rolling');
+            });
+            
+            // Generate random results
+            currentRoll = [];
+            for (let i = 0; i < currentDiceCount; i++) {
+                currentRoll.push(Math.floor(Math.random() * 6) + 1);
+            }
+            
+            setTimeout(() => {
+                // Show results
+                diceElements.forEach((dice, index) => {
+                    dice.classList.remove('rolling');
+                    dice.textContent = diceValues[currentRoll[index] - 1];
+                });
+                
+                processRollResult();
+                isRolling = false;
+                document.getElementById('rollBtn').disabled = false;
+            }, 1000);
+        }
+
+        function processRollResult() {
+            const sum = currentRoll.reduce((a, b) => a + b, 0);
+            
+            // Update display
+            document.getElementById('resultTotal').textContent = sum;
+            document.getElementById('resultIndividual').textContent = 
+                `Dés: ${currentRoll.join(' + ')} = ${sum}`;
+            
+            // Update stats
+            stats.totalRolls++;
+            stats.sumTotal += sum;
+            
+            if (sum > stats.highestRoll) {
+                stats.highestRoll = sum;
+                document.getElementById('resultMessage').textContent = '🎉 Nouveau record!';
+            }
+            
+            if (stats.lowestRoll === 999 || sum < stats.lowestRoll) {
+                stats.lowestRoll = sum;
+            }
+            
+            // Add to history
+            stats.rollHistory.unshift({
+                dice: [...currentRoll],
+                sum: sum,
+                timestamp: new Date().toLocaleTimeString()
+            });
+            
+            // Keep only last 50 rolls
+            if (stats.rollHistory.length > 50) {
+                stats.rollHistory = stats.rollHistory.slice(0, 50);
+            }
+            
+            // Check for special combinations
+            checkSpecialCombinations();
+            
+            // Save and update display
+            saveStats();
+            updateStatsDisplay();
+            updateHistory();
+        }
+
+        function checkSpecialCombinations() {
+            if (currentDiceCount === 1) return;
+            
+            const allSame = currentRoll.every(val => val === currentRoll[0]);
+            const isSequence = currentDiceCount >= 3 && 
+                [...currentRoll].sort((a, b) => a - b).every((val, i, arr) => 
+                    i === 0 || val === arr[i-1] + 1);
+            
+            if (allSame) {
+                document.getElementById('resultMessage').textContent = 
+                    `🎯 Tous les ${currentRoll[0]}! Fantastique!`;
+            } else if (isSequence) {
+                document.getElementById('resultMessage').textContent = 
+                    '🎊 Suite! Excellent lancer!';
+            }
+        }
+
+        function updateStatsDisplay() {
+            document.getElementById('totalRolls').textContent = stats.totalRolls;
+            document.getElementById('highestRoll').textContent = stats.highestRoll;
+            document.getElementById('lowestRoll').textContent = 
+                stats.lowestRoll === 999 ? '-' : stats.lowestRoll;
+            
+            const average = stats.totalRolls > 0 ? 
+                (stats.sumTotal / stats.totalRolls).toFixed(1) : '0';
+            document.getElementById('averageSum').textContent = average;
+        }
+
+        function updateProbabilities() {
+            const probList = document.getElementById('probabilityList');
+            probList.innerHTML = '';
+            
+            const minSum = currentDiceCount;
+            const maxSum = currentDiceCount * 6;
+            
+            // Calculate probabilities for key sums
+            const keyRanges = [
+                { label: 'Minimum', value: minSum },
+                { label: 'Maximum', value: maxSum },
+                { label: 'Médiane', value: Math.round((minSum + maxSum) / 2) }
+            ];
+            
+            keyRanges.forEach(range => {
+                const prob = calculateProbability(range.value);
+                const item = document.createElement('div');
+                item.className = 'probability-item';
+                item.innerHTML = `
+                    <span>${range.label} (${range.value})</span>
+                    <span>${(prob * 100).toFixed(1)}%</span>
+                `;
+                probList.appendChild(item);
+            });
+        }
+
+        function calculateProbability(targetSum) {
+            // Simplified probability calculation
+            const totalOutcomes = Math.pow(6, currentDiceCount);
+            const minSum = currentDiceCount;
+            const maxSum = currentDiceCount * 6;
+            
+            if (targetSum < minSum || targetSum > maxSum) return 0;
+            
+            // For simplicity, use a normal distribution approximation
+            const mean = (minSum + maxSum) / 2;
+            const distance = Math.abs(targetSum - mean);
+            const maxDistance = (maxSum - minSum) / 2;
+            
+            return Math.max(0, 1 - (distance / maxDistance)) / currentDiceCount;
+        }
+
+        function updateHistory() {
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+            
+            stats.rollHistory.slice(0, 10).forEach((roll, index) => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.textContent = `${roll.dice.join('+')} = ${roll.sum} (${roll.timestamp})`;
+                historyList.appendChild(item);
+            });
+        }
+
+        function saveStats() {
+            localStorage.setItem('diceRolls', stats.totalRolls);
+            localStorage.setItem('diceSumTotal', stats.sumTotal);
+            localStorage.setItem('diceHighest', stats.highestRoll);
+            localStorage.setItem('diceLowest', stats.lowestRoll);
+            localStorage.setItem('diceHistory', JSON.stringify(stats.rollHistory));
+        }
+
+        function resetStats() {
+            stats = {
+                totalRolls: 0,
+                sumTotal: 0,
+                highestRoll: 0,
+                lowestRoll: 999,
+                rollHistory: []
+            };
+            
+            localStorage.removeItem('diceRolls');
+            localStorage.removeItem('diceSumTotal');
+            localStorage.removeItem('diceHighest');
+            localStorage.removeItem('diceLowest');
+            localStorage.removeItem('diceHistory');
+            
+            updateStatsDisplay();
+            updateHistory();
+            document.getElementById('resultTotal').textContent = '0';
+            document.getElementById('resultIndividual').textContent = 'Statistiques remises à zéro';
+            document.getElementById('resultMessage').textContent = '';
+        }
+
+        function showAnalytics() {
+            if (stats.totalRolls === 0) {
+                document.getElementById('resultMessage').textContent = 'Aucune donnée à analyser.';
+                return;
+            }
+            
+            const efficiency = ((stats.sumTotal / stats.totalRolls) / (currentDiceCount * 3.5) * 100).toFixed(1);
+            document.getElementById('resultMessage').textContent = 
+                `Efficacité: ${efficiency}% (${stats.totalRolls} lancers analysés)`;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            createDice();
+            updateStatsDisplay();
+            updateProbabilities();
+            updateHistory();
+        });
+    </script>
+</body>
+</html>

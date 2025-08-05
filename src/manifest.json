@@ -13,8 +13,32 @@
       "Splash": {
         "component": "splash"
       },
+      "GameHub": {
+        "component": "gamehub"
+      },
       "Hello": {
         "component": "hello"
+      },
+      "CoinFlip": {
+        "component": "coinflip"
+      },
+      "DiceRoll": {
+        "component": "diceroll"
+      },
+      "Magic8Ball": {
+        "component": "magic8ball"
+      },
+      "ColorMatch": {
+        "component": "colormatch"
+      },
+      "TapCounter": {
+        "component": "tapcounter"
+      },
+      "RockPaperScissors": {
+        "component": "rockpaperscissors"
+      },
+      "MemoryCards": {
+        "component": "memorycards"
       }
     }
   },
@@ -24,8 +48,33 @@
         "titleBarText": "Maxit",
         "titleBar": false
       },
+      "GameHub": {
+        "titleBarText": "L3bMax Game Hub",
+        "titleBar": true
+      },
       "Hello": {
-        "titleBarText": "L3bMax Avec Maxit"
+        "titleBarText": "Tic-Tac-Toe - L3bMax"
+      },
+      "CoinFlip": {
+        "titleBarText": "Pile ou Face - L3bMax"
+      },
+      "DiceRoll": {
+        "titleBarText": "Lancer de Dés - L3bMax"
+      },
+      "Magic8Ball": {
+        "titleBarText": "Magic 8 Ball - L3bMax"
+      },
+      "ColorMatch": {
+        "titleBarText": "Color Match - L3bMax"
+      },
+      "TapCounter": {
+        "titleBarText": "Tap Counter - L3bMax"
+      },
+      "RockPaperScissors": {
+        "titleBarText": "Pierre Papier Ciseaux - L3bMax"
+      },
+      "MemoryCards": {
+        "titleBarText": "Memory Cards - L3bMax"
       }
     }
   }

@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic 8 Ball - L3bMax</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #000, #1a1a1a);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: 28px;
+            color: #FF7900;
+            margin-bottom: 30px;
+        }
+
+        .question-section {
+            margin-bottom: 40px;
+        }
+
+        .question-title {
+            font-size: 18px;
+            color: #FF7900;
+            margin-bottom: 20px;
+        }
+
+        .question-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #FF7900;
+            border-radius: 10px;
+            background-color: #1a1a1a;
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .question-input::placeholder {
+            color: #888;
+        }
+
+        .magic-ball-container {
+            margin: 40px 0;
+            position: relative;
+        }
+
+        .magic-ball {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            background: radial-gradient(circle at 30% 30%, #333, #000);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            border: 4px solid #FF7900;
+            overflow: hidden;
+        }
+
+        .magic-ball:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 121, 0, 0.5);
+        }
+
+        .magic-ball.shaking {
+            animation: shake 1s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .ball-window {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(45deg, #1a1a1a, #333);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 2px solid #444;
+        }
+
+        .ball-answer {
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            max-width: 100px;
+        }
+
+        .ball-answer.visible {
+            opacity: 1;
+        }
+
+        .ball-number {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            width: 40px;
+            height: 40px;
+            background-color: #FF7900;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .ask-btn {
+            padding: 15px 40px;
+            background: linear-gradient(45deg, #FF7900, #e66900);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .ask-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 121, 0, 0.4);
+        }
+
+        .ask-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .instructions {
+            font-size: 14px;
+            color: #CCCCCC;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .history-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #1a1a1a;
+            border-radius: 10px;
+        }
+
+        .history-title {
+            font-size: 18px;
+            color: #FF7900;
+            margin-bottom: 20px;
+        }
+
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #333;
+            border-radius: 8px;
+            border-left: 4px solid #FF7900;
+        }
+
+        .history-question {
+            font-size: 14px;
+            color: #CCCCCC;
+            margin-bottom: 5px;
+            font-style: italic;
+        }
+
+        .history-answer {
+            font-size: 16px;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .history-time {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background-color: #777;
+        }
+
+        .answer-category {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            margin-left: 5px;
+        }
+
+        .positive { background-color: #00ff88; color: #000; }
+        .negative { background-color: #ff4757; color: white; }
+        .neutral { background-color: #ffa502; color: #000; }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">🎱 Magic 8 Ball</h1>
+        
+        <div class="instructions">
+            Posez une question qui peut être répondue par oui ou non, puis secouez la boule magique pour obtenir votre réponse!
+        </div>
+
+        <div class="question-section">
+            <div class="question-title">Posez votre question :</div>
+            <input type="text" 
+                   class="question-input" 
+                   id="questionInput" 
+                   placeholder="Exemple: Vais-je réussir mon examen ?"
+                   maxlength="100">
+        </div>
+
+        <div class="magic-ball-container">
+            <div class="magic-ball" id="magicBall" onclick="askQuestion()">
+                <div class="ball-number">8</div>
+                <div class="ball-window">
+                    <div class="ball-answer" id="ballAnswer">Posez votre question...</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="ask-btn" id="askBtn" onclick="askQuestion()">
+            🔮 Secouer la Boule Magique
+        </button>
+
+        <div class="history-section">
+            <div class="history-title">📜 Historique des Questions</div>
+            <div class="history-list" id="historyList">
+                <div style="text-align: center; color: #888; padding: 20px;">
+                    Aucune question posée pour le moment...
+                </div>
+            </div>
+            
+            <div class="control-buttons">
+                <button class="control-btn" onclick="clearHistory()">Effacer l'historique</button>
+                <button class="control-btn" onclick="randomQuestion()">Question aléatoire</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isShaking = false;
+        let questionHistory = JSON.parse(localStorage.getItem('magic8History')) || [];
+
+        const answers = {
+            positive: [
+                "Oui, absolument!",
+                "C'est certain",
+                "Sans aucun doute",
+                "Oui, définitivement",
+                "Vous pouvez compter dessus",
+                "Tout à fait",
+                "Très probablement",
+                "Les signes pointent vers oui"
+            ],
+            negative: [
+                "Non",
+                "Ma réponse est non",
+                "Mes sources disent non",
+                "Très peu probable",
+                "N'y comptez pas",
+                "Ma réponse est non",
+                "Certainement pas",
+                "Les perspectives ne sont pas bonnes"
+            ],
+            neutral: [
+                "Réponse floue, essayez encore",
+                "Demandez de nouveau plus tard",
+                "Mieux vaut ne pas vous le dire maintenant",
+                "Impossible de prédire maintenant",
+                "Concentrez-vous et demandez de nouveau",
+                "Les étoiles ne sont pas alignées",
+                "Reposez la question plus tard",
+                "Trop tôt pour le dire"
+            ]
+        };
+
+        const sampleQuestions = [
+            "Vais-je réussir mon examen ?",
+            "Vais-je rencontrer quelqu'un de spécial bientôt ?",
+            "Devrais-je changer de travail ?",
+            "Vais-je gagner à la loterie ?",
+            "Est-ce que mon équipe va gagner ?",
+            "Vais-je voyager cette année ?",
+            "Est-ce que je vais bien dormir ce soir ?",
+            "Devrais-je acheter cette chose ?",
+            "Vais-je apprendre quelque chose de nouveau ?",
+            "Est-ce que demain sera une bonne journée ?"
+        ];
+
+        function askQuestion() {
+            if (isShaking) return;
+
+            const questionInput = document.getElementById('questionInput');
+            const question = questionInput.value.trim();
+
+            if (!question) {
+                alert('Veuillez poser une question avant de secouer la boule magique!');
+                questionInput.focus();
+                return;
+            }
+
+            isShaking = true;
+            document.getElementById('askBtn').disabled = true;
+            
+            const ball = document.getElementById('magicBall');
+            const answerElement = document.getElementById('ballAnswer');
+            
+            // Hide current answer
+            answerElement.classList.remove('visible');
+            
+            // Start shaking animation
+            ball.classList.add('shaking');
+            
+            setTimeout(() => {
+                // Select random answer
+                const category = getRandomCategory();
+                const categoryAnswers = answers[category];
+                const answer = categoryAnswers[Math.floor(Math.random() * categoryAnswers.length)];
+                
+                // Show answer
+                answerElement.textContent = answer;
+                answerElement.classList.add('visible');
+                
+                // Save to history
+                saveToHistory(question, answer, category);
+                
+                // Update display
+                updateHistoryDisplay();
+                
+                // Reset state
+                ball.classList.remove('shaking');
+                isShaking = false;
+                document.getElementById('askBtn').disabled = false;
+                
+                // Clear input
+                questionInput.value = '';
+                
+            }, 1000);
+        }
+
+        function getRandomCategory() {
+            const rand = Math.random();
+            if (rand < 0.4) return 'positive';
+            if (rand < 0.8) return 'negative';
+            return 'neutral';
+        }
+
+        function saveToHistory(question, answer, category) {
+            const entry = {
+                question: question,
+                answer: answer,
+                category: category,
+                timestamp: new Date().toLocaleString()
+            };
+            
+            questionHistory.unshift(entry);
+            
+            // Keep only last 20 questions
+            if (questionHistory.length > 20) {
+                questionHistory = questionHistory.slice(0, 20);
+            }
+            
+            localStorage.setItem('magic8History', JSON.stringify(questionHistory));
+        }
+
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('historyList');
+            
+            if (questionHistory.length === 0) {
+                historyList.innerHTML = `
+                    <div style="text-align: center; color: #888; padding: 20px;">
+                        Aucune question posée pour le moment...
+                    </div>
+                `;
+                return;
+            }
+            
+            historyList.innerHTML = questionHistory.map((entry, index) => `
+                <div class="history-item">
+                    <div class="history-question">"${entry.question}"</div>
+                    <div class="history-answer">
+                        ${entry.answer}
+                        <span class="answer-category ${entry.category}">
+                            ${getCategoryLabel(entry.category)}
+                        </span>
+                    </div>
+                    <div class="history-time">${entry.timestamp}</div>
+                </div>
+            `).join('');
+        }
+
+        function getCategoryLabel(category) {
+            switch (category) {
+                case 'positive': return 'Positif';
+                case 'negative': return 'Négatif';
+                case 'neutral': return 'Neutre';
+                default: return '';
+            }
+        }
+
+        function clearHistory() {
+            questionHistory = [];
+            localStorage.removeItem('magic8History');
+            updateHistoryDisplay();
+            
+            // Reset ball
+            document.getElementById('ballAnswer').textContent = 'Historique effacé!';
+            document.getElementById('ballAnswer').classList.add('visible');
+            
+            setTimeout(() => {
+                document.getElementById('ballAnswer').textContent = 'Posez votre question...';
+            }, 2000);
+        }
+
+        function randomQuestion() {
+            const randomQ = sampleQuestions[Math.floor(Math.random() * sampleQuestions.length)];
+            document.getElementById('questionInput').value = randomQ;
+            document.getElementById('questionInput').focus();
+        }
+
+        // Handle Enter key in input
+        document.getElementById('questionInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                askQuestion();
+            }
+        });
+
+        // Initialize display
+        document.addEventListener('DOMContentLoaded', () => {
+            updateHistoryDisplay();
+        });
+    </script>
+</body>
+</html>

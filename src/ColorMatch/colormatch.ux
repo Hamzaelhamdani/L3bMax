@@ -1,0 +1,365 @@
+<template>
+  <div class="container">
+    <div class="header">
+      <text class="back-btn" onclick="goBack">← Retour</text>
+      <text class="title">🎯 Color Match</text>
+    </div>
+    
+    <div class="game-area">
+      <div class="game-info">
+        <text class="score">Score: {{score}}</text>
+        <text class="timer">Temps: {{timeLeft}}s</text>
+        <text class="level">Niveau: {{level}}</text>
+      </div>
+      
+      <div class="instruction-area" if="{{!gameStarted}}">
+        <text class="instruction">Trouvez les paires de couleurs identiques!</text>
+        <text class="sub-instruction">Vous avez {{levelTime}}s par niveau</text>
+      </div>
+      
+      <div class="target-color" if="{{gameStarted && !gameOver}}">
+        <text class="target-label">Trouvez cette couleur:</text>
+        <div class="color-display" style="background-color: {{targetColor}};"></div>
+      </div>
+      
+      <div class="colors-grid" if="{{gameStarted && !gameOver}}">
+        <div class="color-option" for="{{(index, color) in colorOptions}}" 
+             onclick="selectColor" 
+             data-index="{{index}}"
+             style="background-color: {{color}};">
+        </div>
+      </div>
+      
+      <div class="game-over" if="{{gameOver}}">
+        <text class="game-over-title">🎯 Partie Terminée!</text>
+        <text class="final-score">Score Final: {{score}}</text>
+        <text class="level-reached">Niveau Atteint: {{level}}</text>
+        <text class="accuracy">Précision: {{accuracy}}%</text>
+      </div>
+      
+      <div class="action-buttons">
+        <text class="start-btn" onclick="startGame" if="{{!gameStarted}}">🎯 Commencer</text>
+        <text class="restart-btn" onclick="restartGame" if="{{gameOver}}">Nouvelle Partie</text>
+      </div>
+      
+      <div class="stats" if="{{gameStarted}}">
+        <text class="stat-item">Correct: {{correctAnswers}}</text>
+        <text class="stat-item">Erreurs: {{wrongAnswers}}</text>
+        <text class="stat-item">Combo: {{combo}}</text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+  .container {
+    flex-direction: column;
+    background-color: #000000;
+    height: 100%;
+    padding: 20px;
+  }
+  
+  .header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .back-btn {
+    color: #FF7900;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 10px;
+  }
+  
+  .title {
+    color: #FFFFFF;
+    font-size: 24px;
+    font-weight: bold;
+    margin-left: 20px;
+  }
+  
+  .game-area {
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+  }
+  
+  .game-info {
+    flex-direction: row;
+    gap: 20px;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+  
+  .score, .timer, .level {
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 8px 15px;
+    background-color: #333333;
+    border-radius: 20px;
+  }
+  
+  .timer {
+    color: #FF7900;
+  }
+  
+  .instruction-area {
+    flex-direction: column;
+    align-items: center;
+    margin: 40px 0;
+  }
+  
+  .instruction {
+    color: #FFFFFF;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  
+  .sub-instruction {
+    color: #CCCCCC;
+    font-size: 14px;
+    text-align: center;
+  }
+  
+  .target-color {
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+  }
+  
+  .target-label {
+    color: #FFFFFF;
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .color-display {
+    width: 80px;
+    height: 80px;
+    border-radius: 40px;
+    border: 4px solid #FFFFFF;
+  }
+  
+  .colors-grid {
+    flex-direction: column;
+    gap: 15px;
+    margin: 30px 0;
+  }
+  
+  .colors-row {
+    flex-direction: row;
+    gap: 15px;
+    justify-content: center;
+  }
+  
+  .color-option {
+    width: 60px;
+    height: 60px;
+    border-radius: 30px;
+    border: 3px solid #FFFFFF;
+    margin: 5px;
+  }
+  
+  .game-over {
+    flex-direction: column;
+    align-items: center;
+    margin: 30px 0;
+    text-align: center;
+  }
+  
+  .game-over-title {
+    color: #FF7900;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+  
+  .final-score {
+    color: #FFFFFF;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .level-reached, .accuracy {
+    color: #CCCCCC;
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+  
+  .action-buttons {
+    margin: 20px 0;
+  }
+  
+  .start-btn, .restart-btn {
+    padding: 20px 40px;
+    background-color: #FF7900;
+    color: #FFFFFF;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 10px;
+    text-align: center;
+  }
+  
+  .stats {
+    flex-direction: row;
+    gap: 20px;
+    margin-top: 20px;
+  }
+  
+  .stat-item {
+    color: #FFFFFF;
+    font-size: 14px;
+    text-align: center;
+    padding: 5px 10px;
+    background-color: #1a1a1a;
+    border-radius: 15px;
+  }
+</style>
+
+<script>
+  export default {
+    data: {
+      gameStarted: false,
+      gameOver: false,
+      score: 0,
+      level: 1,
+      timeLeft: 30,
+      levelTime: 30,
+      targetColor: '#FF0000',
+      colorOptions: [],
+      correctAnswers: 0,
+      wrongAnswers: 0,
+      combo: 0,
+      accuracy: 0,
+      gameTimer: null,
+      colors: [
+        '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF',
+        '#FFA500', '#800080', '#FFC0CB', '#A52A2A', '#808080', '#000080',
+        '#008000', '#800000', '#808000', '#FF4500', '#DA70D6', '#32CD32',
+        '#FFD700', '#4169E1', '#DC143C', '#00CED1', '#FF1493', '#228B22'
+      ]
+    },
+    
+    startGame() {
+      this.gameStarted = true;
+      this.gameOver = false;
+      this.score = 0;
+      this.level = 1;
+      this.correctAnswers = 0;
+      this.wrongAnswers = 0;
+      this.combo = 0;
+      this.levelTime = 30;
+      this.timeLeft = this.levelTime;
+      
+      this.generateNewRound();
+      this.startTimer();
+    },
+    
+    generateNewRound() {
+      // Sélectionner une couleur cible
+      this.targetColor = this.colors[Math.floor(Math.random() * this.colors.length)];
+      
+      // Créer un grid de couleurs avec la cible incluse
+      const gridSize = Math.min(4 + this.level, 9); // Augmente la difficulté
+      this.colorOptions = [];
+      
+      // Ajouter la couleur cible
+      this.colorOptions.push(this.targetColor);
+      
+      // Ajouter des couleurs distractrices
+      while (this.colorOptions.length < gridSize) {
+        const randomColor = this.colors[Math.floor(Math.random() * this.colors.length)];
+        if (!this.colorOptions.includes(randomColor)) {
+          this.colorOptions.push(randomColor);
+        }
+      }
+      
+      // Mélanger le tableau
+      for (let i = this.colorOptions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [this.colorOptions[i], this.colorOptions[j]] = [this.colorOptions[j], this.colorOptions[i]];
+      }
+    },
+    
+    selectColor(e) {
+      const selectedIndex = parseInt(e.target.attr.dataIndex);
+      const selectedColor = this.colorOptions[selectedIndex];
+      
+      if (selectedColor === this.targetColor) {
+        // Bonne réponse
+        this.correctAnswers++;
+        this.combo++;
+        const points = 10 + (this.combo * 2) + (this.level * 5);
+        this.score += points;
+        
+        // Niveau suivant après 5 bonnes réponses
+        if (this.correctAnswers % 5 === 0) {
+          this.levelUp();
+        } else {
+          this.generateNewRound();
+        }
+      } else {
+        // Mauvaise réponse
+        this.wrongAnswers++;
+        this.combo = 0;
+        this.generateNewRound();
+      }
+      
+      this.updateAccuracy();
+    },
+    
+    levelUp() {
+      this.level++;
+      this.levelTime = Math.max(15, this.levelTime - 2); // Temps réduit mais minimum 15s
+      this.timeLeft = this.levelTime;
+      this.generateNewRound();
+    },
+    
+    startTimer() {
+      this.gameTimer = setInterval(() => {
+        this.timeLeft--;
+        
+        if (this.timeLeft <= 0) {
+          this.endGame();
+        }
+      }, 1000);
+    },
+    
+    endGame() {
+      this.gameOver = true;
+      this.gameStarted = false;
+      if (this.gameTimer) {
+        clearInterval(this.gameTimer);
+        this.gameTimer = null;
+      }
+      this.updateAccuracy();
+    },
+    
+    updateAccuracy() {
+      const total = this.correctAnswers + this.wrongAnswers;
+      this.accuracy = total > 0 ? Math.round((this.correctAnswers / total) * 100) : 0;
+    },
+    
+    restartGame() {
+      this.startGame();
+    },
+    
+    goBack() {
+      if (this.gameTimer) {
+        clearInterval(this.gameTimer);
+      }
+      this.$app.router.back();
+    },
+    
+    onDestroy() {
+      if (this.gameTimer) {
+        clearInterval(this.gameTimer);
+      }
+    }
+  }
+</script>

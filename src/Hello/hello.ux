@@ -41,7 +41,8 @@
     </div>
     
     <div class="controls">
-      <input type="button" value="New Game" onclick="resetGame" class="reset-btn" />
+      <input type="button" value="Nouveau Jeu" onclick="resetGame" class="reset-btn" />
+      <input type="button" value="← Retour aux Jeux" onclick="backToHub" class="back-btn" />
     </div>
   </div>
 </template>
@@ -116,16 +117,31 @@
 
   .controls {
     margin-top: 20px;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
   }
 
   .reset-btn {
-    width: 220px;
+    width: 140px;
     height: 55px;
     background-color: #FF7900;
     color: #FFFFFF;
-    font-size: 18px;
+    font-size: 16px;
     border-radius: 8px;
     font-weight: bold;
+    margin: 5px;
+  }
+
+  .back-btn {
+    width: 140px;
+    height: 55px;
+    background-color: #666666;
+    color: #FFFFFF;
+    font-size: 16px;
+    border-radius: 8px;
+    font-weight: bold;
+    margin: 5px;
   }
 </style>
 
@@ -234,6 +250,13 @@
       this.gameOver = false;
       this.winnerText = '';
       this.updateStatusText();
+    },
+    
+    backToHub() {
+      console.info('Returning to Game Hub');
+      this.$router.push({
+        uri: '/GameHub'
+      });
     }
   }
 </script>

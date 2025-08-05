@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reaction Time - L3bMax</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #000, #1a1a1a);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: 28px;
+            color: #FF7900;
+            margin-bottom: 30px;
+        }
+
+        .reaction-area {
+            width: 100%;
+            height: 300px;
+            margin: 30px 0;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid #333;
+            position: relative;
+        }
+
+        .reaction-area.waiting {
+            background-color: #333;
+            color: #CCCCCC;
+        }
+
+        .reaction-area.ready {
+            background-color: #ff4757;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        .reaction-area.go {
+            background-color: #00ff88;
+            color: #000;
+            border-color: #00ff88;
+        }
+
+        .reaction-area.too-early {
+            background-color: #ff6b6b;
+            color: white;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25%, 75% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+        }
+
+        .game-instructions {
+            font-size: 16px;
+            color: #CCCCCC;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .result-display {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #1a1a1a;
+            border-radius: 10px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-time {
+            font-size: 48px;
+            font-weight: bold;
+            color: #FF7900;
+        }
+
+        .result-unit {
+            font-size: 24px;
+            color: #CCCCCC;
+            margin-left: 10px;
+        }
+
+        .result-message {
+            font-size: 18px;
+            color: #00ff88;
+            margin-top: 10px;
+        }
+
+        .stats-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #1a1a1a;
+            border-radius: 10px;
+        }
+
+        .stats-title {
+            font-size: 18px;
+            color: #FF7900;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background-color: #333;
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #CCCCCC;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #FF7900;
+        }
+
+        .performance-meter {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #333;
+            border-radius: 8px;
+        }
+
+        .meter-title {
+            font-size: 16px;
+            color: #FF7900;
+            margin-bottom: 10px;
+        }
+
+        .meter-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #1a1a1a;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .meter-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4757, #ffa502, #00ff88);
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            padding: 12px 24px;
+            background-color: #FF7900;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background-color: #e66900;
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .difficulty-selector {
+            margin-bottom: 20px;
+        }
+
+        .difficulty-title {
+            font-size: 16px;
+            color: #FF7900;
+            margin-bottom: 10px;
+        }
+
+        .difficulty-btn {
+            padding: 8px 16px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .difficulty-btn.active {
+            background-color: #FF7900;
+        }
+
+        .countdown {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 72px;
+            font-weight: bold;
+            color: #FF7900;
+            opacity: 0;
+            animation: countdownPulse 1s ease-in-out;
+        }
+
+        @keyframes countdownPulse {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">⚡ Reaction Time</h1>
+        
+        <div class="game-instructions">
+            Cliquez sur "Commencer" puis attendez que la zone devienne verte. Cliquez le plus rapidement possible!
+        </div>
+
+        <div class="difficulty-selector">
+            <div class="difficulty-title">Difficulté:</div>
+            <button class="difficulty-btn active" onclick="setDifficulty('easy')">Facile</button>
+            <button class="difficulty-btn" onclick="setDifficulty('medium')">Moyen</button>
+            <button class="difficulty-btn" onclick="setDifficulty('hard')">Difficile</button>
+        </div>
+
+        <div class="reaction-area waiting" id="reactionArea" onclick="handleClick()">
+            <div id="areaText">Cliquez sur "Commencer" pour débuter</div>
+            <div class="countdown" id="countdown" style="display: none;"></div>
+        </div>
+
+        <div class="control-buttons">
+            <button class="control-btn" id="startBtn" onclick="startTest()">Commencer le Test</button>
+            <button class="control-btn" onclick="resetStats()">Reset Stats</button>
+        </div>
+
+        <div class="result-display" id="resultDisplay">
+            <div style="color: #888;">Votre temps de réaction apparaîtra ici</div>
+        </div>
+
+        <div class="stats-section">
+            <div class="stats-title">📊 Statistiques</div>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Meilleur Temps</div>
+                    <div class="stat-value" id="bestTime">-</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Temps Moyen</div>
+                    <div class="stat-value" id="averageTime">-</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Tests Complétés</div>
+                    <div class="stat-value" id="totalTests">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Essais Ratés</div>
+                    <div class="stat-value" id="failedAttempts">0</div>
+                </div>
+            </div>
+
+            <div class="performance-meter">
+                <div class="meter-title">Performance Générale</div>
+                <div class="meter-bar">
+                    <div class="meter-fill" id="performanceFill"></div>
+                </div>
+                <div class="meter-labels">
+                    <span>Lent</span>
+                    <span>Moyen</span>
+                    <span>Rapide</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = 'waiting'; // 'waiting', 'ready', 'go', 'finished'
+        let startTime = 0;
+        let timeout = null;
+        let difficulty = 'easy';
+        let countdownInterval = null;
+        
+        let stats = {
+            bestTime: parseFloat(localStorage.getItem('reactionBest')) || null,
+            totalTime: parseFloat(localStorage.getItem('reactionTotal')) || 0,
+            totalTests: parseInt(localStorage.getItem('reactionTests')) || 0,
+            failedAttempts: parseInt(localStorage.getItem('reactionFailed')) || 0
+        };
+
+        const difficultySettings = {
+            easy: { minWait: 2000, maxWait: 5000, name: 'Facile' },
+            medium: { minWait: 1000, maxWait: 4000, name: 'Moyen' },
+            hard: { minWait: 500, maxWait: 3000, name: 'Difficile' }
+        };
+
+        function setDifficulty(level) {
+            difficulty = level;
+            
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function startTest() {
+            if (gameState !== 'waiting') return;
+            
+            gameState = 'ready';
+            document.getElementById('startBtn').disabled = true;
+            
+            const area = document.getElementById('reactionArea');
+            const text = document.getElementById('areaText');
+            
+            area.className = 'reaction-area ready';
+            text.textContent = 'Attendez le vert...';
+            
+            // Show countdown
+            showCountdown();
+            
+            // Random delay based on difficulty
+            const settings = difficultySettings[difficulty];
+            const delay = Math.random() * (settings.maxWait - settings.minWait) + settings.minWait;
+            
+            timeout = setTimeout(() => {
+                if (gameState === 'ready') {
+                    gameState = 'go';
+                    area.className = 'reaction-area go';
+                    text.textContent = 'CLIQUEZ MAINTENANT!';
+                    startTime = performance.now();
+                }
+            }, delay);
+        }
+
+        function showCountdown() {
+            const countdownEl = document.getElementById('countdown');
+            let count = 3;
+            
+            function displayCount() {
+                if (gameState !== 'ready') return;
+                
+                countdownEl.textContent = count;
+                countdownEl.style.display = 'block';
+                countdownEl.style.animation = 'none';
+                
+                setTimeout(() => {
+                    countdownEl.style.animation = 'countdownPulse 1s ease-in-out';
+                }, 10);
+                
+                count--;
+                
+                if (count >= 0) {
+                    setTimeout(displayCount, 1000);
+                } else {
+                    setTimeout(() => {
+                        countdownEl.style.display = 'none';
+                    }, 1000);
+                }
+            }
+            
+            displayCount();
+        }
+
+        function handleClick() {
+            const area = document.getElementById('reactionArea');
+            const text = document.getElementById('areaText');
+            
+            if (gameState === 'waiting') {
+                return; // Do nothing
+            }
+            
+            if (gameState === 'ready') {
+                // Too early!
+                gameState = 'waiting';
+                area.className = 'reaction-area too-early';
+                text.textContent = 'Trop tôt! Cliquez sur "Commencer" pour réessayer';
+                
+                stats.failedAttempts++;
+                localStorage.setItem('reactionFailed', stats.failedAttempts);
+                
+                clearTimeout(timeout);
+                document.getElementById('startBtn').disabled = false;
+                
+                setTimeout(() => {
+                    area.className = 'reaction-area waiting';
+                    text.textContent = 'Cliquez sur "Commencer" pour débuter';
+                }, 2000);
+                
+                updateStatsDisplay();
+                return;
+            }
+            
+            if (gameState === 'go') {
+                // Perfect timing!
+                const reactionTime = performance.now() - startTime;
+                gameState = 'finished';
+                
+                area.className = 'reaction-area waiting';
+                text.textContent = 'Excellent! Cliquez sur "Commencer" pour réessayer';
+                
+                processResult(reactionTime);
+                
+                setTimeout(() => {
+                    document.getElementById('startBtn').disabled = false;
+                    gameState = 'waiting';
+                }, 2000);
+            }
+        }
+
+        function processResult(time) {
+            // Update stats
+            stats.totalTests++;
+            stats.totalTime += time;
+            
+            if (!stats.bestTime || time < stats.bestTime) {
+                stats.bestTime = time;
+                localStorage.setItem('reactionBest', stats.bestTime);
+            }
+            
+            localStorage.setItem('reactionTotal', stats.totalTime);
+            localStorage.setItem('reactionTests', stats.totalTests);
+            
+            // Display result
+            displayResult(time);
+            updateStatsDisplay();
+            updatePerformanceMeter();
+        }
+
+        function displayResult(time) {
+            const resultDisplay = document.getElementById('resultDisplay');
+            const timeMs = Math.round(time);
+            
+            let message = '';
+            let color = '#FF7900';
+            
+            if (timeMs < 200) {
+                message = '🚀 Incroyable! Réflexes de ninja!';
+                color = '#00ff88';
+            } else if (timeMs < 250) {
+                message = '⚡ Excellent! Très rapide!';
+                color = '#00ff88';
+            } else if (timeMs < 300) {
+                message = '👍 Bon temps de réaction!';
+                color = '#ffa502';
+            } else if (timeMs < 400) {
+                message = '👌 Pas mal, continuez!';
+                color = '#ffa502';
+            } else {
+                message = '🐌 Essayez de vous concentrer plus!';
+                color = '#ff4757';
+            }
+            
+            resultDisplay.innerHTML = `
+                <div>
+                    <span class="result-time" style="color: ${color}">${timeMs}</span>
+                    <span class="result-unit">ms</span>
+                    <div class="result-message" style="color: ${color}">${message}</div>
+                </div>
+            `;
+        }
+
+        function updateStatsDisplay() {
+            document.getElementById('totalTests').textContent = stats.totalTests;
+            document.getElementById('failedAttempts').textContent = stats.failedAttempts;
+            
+            if (stats.bestTime) {
+                document.getElementById('bestTime').textContent = Math.round(stats.bestTime) + 'ms';
+            }
+            
+            if (stats.totalTests > 0) {
+                const average = stats.totalTime / stats.totalTests;
+                document.getElementById('averageTime').textContent = Math.round(average) + 'ms';
+            }
+        }
+
+        function updatePerformanceMeter() {
+            if (stats.totalTests === 0) return;
+            
+            const average = stats.totalTime / stats.totalTests;
+            let performance = 0;
+            
+            // Scale: 500ms = 0%, 200ms = 100%
+            if (average <= 200) {
+                performance = 100;
+            } else if (average >= 500) {
+                performance = 0;
+            } else {
+                performance = ((500 - average) / 300) * 100;
+            }
+            
+            document.getElementById('performanceFill').style.width = performance + '%';
+        }
+
+        function resetStats() {
+            stats = {
+                bestTime: null,
+                totalTime: 0,
+                totalTests: 0,
+                failedAttempts: 0
+            };
+            
+            localStorage.removeItem('reactionBest');
+            localStorage.removeItem('reactionTotal');
+            localStorage.removeItem('reactionTests');
+            localStorage.removeItem('reactionFailed');
+            
+            document.getElementById('resultDisplay').innerHTML = 
+                '<div style="color: #888;">Statistiques remises à zéro</div>';
+            
+            updateStatsDisplay();
+            updatePerformanceMeter();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStatsDisplay();
+            updatePerformanceMeter();
+        });
+
+        // Prevent accidental clicks during countdown
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && gameState === 'go') {
+                e.preventDefault();
+                handleClick();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Match - L3bMax</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #000, #1a1a1a);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: 28px;
+            color: #FF7900;
+            margin-bottom: 30px;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FF7900;
+        }
+
+        .target-color {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            border-radius: 15px;
+            border: 3px solid #FF7900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+
+        .instruction {
+            font-size: 16px;
+            margin-bottom: 30px;
+            color: #CCCCCC;
+        }
+
+        .color-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .color-option {
+            aspect-ratio: 1;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .color-option:hover {
+            transform: scale(0.95);
+            box-shadow: 0 0 20px rgba(255, 121, 0, 0.5);
+        }
+
+        .color-option.correct {
+            animation: correctAnswer 0.6s ease;
+        }
+
+        .color-option.wrong {
+            animation: wrongAnswer 0.6s ease;
+        }
+
+        @keyframes correctAnswer {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); box-shadow: 0 0 30px #00ff88; }
+        }
+
+        @keyframes wrongAnswer {
+            0%, 100% { transform: scale(1); }
+            25%, 75% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); box-shadow: 0 0 30px #ff4757; }
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .control-btn {
+            padding: 12px 24px;
+            background-color: #FF7900;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background-color: #e66900;
+        }
+
+        .game-message {
+            font-size: 18px;
+            margin-bottom: 20px;
+            min-height: 25px;
+            color: #FF7900;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #333;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #FF7900;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">🎨 Color Match</h1>
+        
+        <div class="game-stats">
+            <div class="stat-item">
+                <div>Score</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat-item">
+                <div>Niveau</div>
+                <div class="stat-value" id="level">1</div>
+            </div>
+            <div class="stat-item">
+                <div>Temps</div>
+                <div class="stat-value" id="timeLeft">10s</div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="game-message" id="gameMessage">Trouvez la couleur correspondante!</div>
+
+        <div class="target-color" id="targetColor">
+            Couleur Cible
+        </div>
+
+        <div class="instruction">Cliquez sur la couleur identique</div>
+
+        <div class="color-options" id="colorOptions"></div>
+
+        <div class="control-buttons">
+            <button class="control-btn" onclick="startNewGame()">Nouvelle Partie</button>
+            <button class="control-btn" onclick="skipRound()">Passer</button>
+        </div>
+    </div>
+
+    <script>
+        let score = 0;
+        let level = 1;
+        let timeLeft = 10;
+        let gameTimer;
+        let currentTargetColor = '';
+        let gameActive = false;
+
+        const colors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+            '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+            '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D2B4DE',
+            '#AED6F1', '#A3E4D7', '#F9E79F', '#FADBD8', '#D5DBDB'
+        ];
+
+        function startNewGame() {
+            score = 0;
+            level = 1;
+            timeLeft = 10;
+            gameActive = true;
+            
+            updateDisplay();
+            generateRound();
+            startTimer();
+        }
+
+        function generateRound() {
+            if (!gameActive) return;
+
+            // Sélectionner une couleur cible aléatoire
+            currentTargetColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            // Afficher la couleur cible
+            const targetElement = document.getElementById('targetColor');
+            targetElement.style.backgroundColor = currentTargetColor;
+            targetElement.textContent = '';
+
+            // Générer les options (1 correcte + 3 incorrectes)
+            const options = [currentTargetColor];
+            
+            // Ajouter des couleurs similaires pour plus de difficulté
+            while (options.length < 4) {
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                if (!options.includes(randomColor)) {
+                    options.push(randomColor);
+                }
+            }
+
+            // Mélanger les options
+            for (let i = options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [options[i], options[j]] = [options[j], options[i]];
+            }
+
+            // Créer les boutons d'options
+            const optionsContainer = document.getElementById('colorOptions');
+            optionsContainer.innerHTML = '';
+            
+            options.forEach((color, index) => {
+                const button = document.createElement('button');
+                button.className = 'color-option';
+                button.style.backgroundColor = color;
+                button.onclick = () => selectColor(color, button);
+                optionsContainer.appendChild(button);
+            });
+
+            // Reset du temps
+            timeLeft = Math.max(8 - Math.floor(level / 3), 5); // Temps diminue avec le niveau
+            updateDisplay();
+        }
+
+        function selectColor(selectedColor, buttonElement) {
+            if (!gameActive) return;
+
+            clearInterval(gameTimer);
+
+            if (selectedColor === currentTargetColor) {
+                // Bonne réponse
+                buttonElement.classList.add('correct');
+                score += level * 10;
+                level++;
+                
+                document.getElementById('gameMessage').textContent = 'Correct! +' + (level - 1) * 10 + ' points';
+                
+                setTimeout(() => {
+                    generateRound();
+                    startTimer();
+                }, 1000);
+            } else {
+                // Mauvaise réponse
+                buttonElement.classList.add('wrong');
+                gameOver();
+            }
+
+            updateDisplay();
+        }
+
+        function startTimer() {
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                updateDisplay();
+                updateProgressBar();
+                
+                if (timeLeft <= 0) {
+                    gameOver();
+                }
+            }, 1000);
+        }
+
+        function updateProgressBar() {
+            const maxTime = Math.max(8 - Math.floor(level / 3), 5);
+            const progress = (timeLeft / maxTime) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function gameOver() {
+            gameActive = false;
+            clearInterval(gameTimer);
+            document.getElementById('gameMessage').textContent = 
+                `Partie terminée! Score final: ${score} points`;
+            
+            // Désactiver toutes les options
+            const options = document.querySelectorAll('.color-option');
+            options.forEach(option => {
+                option.style.opacity = '0.5';
+                option.style.cursor = 'not-allowed';
+                option.onclick = null;
+            });
+        }
+
+        function skipRound() {
+            if (!gameActive) return;
+            
+            clearInterval(gameTimer);
+            level = Math.max(1, level - 1); // Pénalité: niveau réduit
+            generateRound();
+            startTimer();
+            
+            document.getElementById('gameMessage').textContent = 'Niveau passé (-1 niveau)';
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('level').textContent = level;
+            document.getElementById('timeLeft').textContent = timeLeft + 's';
+        }
+
+        // Démarrer le jeu au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('gameMessage').textContent = 'Cliquez sur "Nouvelle Partie" pour commencer!';
+        });
+    </script>
+</body>
+</html>

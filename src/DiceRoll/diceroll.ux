@@ -1,0 +1,281 @@
+<template>
+  <div class="container">
+    <div class="header">
+      <text class="back-btn" onclick="goBack">← Retour</text>
+      <text class="title">🎲 Lancer de Dés</text>
+    </div>
+    
+    <div class="game-area">
+      <div class="dice-container">
+        <div class="dice {{isRolling ? 'rolling' : ''}}" for="{{(index, dice) in diceArray}}">
+          <div class="dice-face">
+            <text class="dice-number">{{dice}}</text>
+          </div>
+        </div>
+      </div>
+      
+      <div class="dice-count-selector">
+        <text class="selector-label">Nombre de dés:</text>
+        <div class="count-buttons">
+          <text class="count-btn {{diceCount === 1 ? 'active' : ''}}" onclick="setDiceCount" data-count="1">1</text>
+          <text class="count-btn {{diceCount === 2 ? 'active' : ''}}" onclick="setDiceCount" data-count="2">2</text>
+          <text class="count-btn {{diceCount === 3 ? 'active' : ''}}" onclick="setDiceCount" data-count="3">3</text>
+        </div>
+      </div>
+      
+      <div class="result-area" if="{{total > 0}}">
+        <text class="total-text">Total: {{total}}</text>
+        <text class="roll-details" if="{{diceCount > 1}}">Détail: {{diceArray.join(' + ')}}</text>
+      </div>
+      
+      <div class="action-buttons">
+        <text class="roll-btn" onclick="rollDice" if="{{!isRolling}}">🎲 Lancer!</text>
+        <text class="rolling-text" if="{{isRolling}}">🎲 Lancement...</text>
+      </div>
+      
+      <div class="history" if="{{rollHistory.length > 0}}">
+        <text class="history-title">Historique des lancers:</text>
+        <div class="history-list">
+          <text class="history-item" for="{{roll in rollHistory}}">{{roll}}</text>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+  .container {
+    flex-direction: column;
+    background-color: #000000;
+    height: 100%;
+    padding: 20px;
+  }
+  
+  .header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+  
+  .back-btn {
+    color: #FF7900;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 10px;
+  }
+  
+  .title {
+    color: #FFFFFF;
+    font-size: 24px;
+    font-weight: bold;
+    margin-left: 20px;
+  }
+  
+  .game-area {
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+  }
+  
+  .dice-container {
+    flex-direction: row;
+    gap: 15px;
+    margin: 30px 0;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .dice {
+    width: 80px;
+    height: 80px;
+    background-color: #FFFFFF;
+    border-radius: 12px;
+    border: 3px solid #FF7900;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  
+  .dice.rolling {
+    animation: roll 0.8s ease-in-out;
+  }
+  
+  .dice-face {
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .dice-number {
+    color: #FF7900;
+    font-size: 32px;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .dice-count-selector {
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+  }
+  
+  .selector-label {
+    color: #FFFFFF;
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .count-buttons {
+    flex-direction: row;
+    gap: 10px;
+  }
+  
+  .count-btn {
+    padding: 10px 20px;
+    background-color: #333333;
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 6px;
+    text-align: center;
+    min-width: 40px;
+  }
+  
+  .count-btn.active {
+    background-color: #FF7900;
+  }
+  
+  .result-area {
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+  }
+  
+  .total-text {
+    color: #FF7900;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .roll-details {
+    color: #FFFFFF;
+    font-size: 16px;
+  }
+  
+  .action-buttons {
+    margin: 20px 0;
+  }
+  
+  .roll-btn, .rolling-text {
+    padding: 20px 40px;
+    background-color: #FF7900;
+    color: #FFFFFF;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 10px;
+    text-align: center;
+  }
+  
+  .rolling-text {
+    background-color: #666666;
+  }
+  
+  .history {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 30px;
+    max-width: 300px;
+  }
+  
+  .history-title {
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .history-list {
+    flex-direction: column;
+    gap: 5px;
+    max-height: 120px;
+    overflow: hidden;
+  }
+  
+  .history-item {
+    color: #CCCCCC;
+    font-size: 14px;
+    text-align: center;
+  }
+  
+  @keyframes roll {
+    0% { transform: rotateX(0deg) rotateY(0deg); }
+    25% { transform: rotateX(90deg) rotateY(90deg); }
+    50% { transform: rotateX(180deg) rotateY(180deg); }
+    75% { transform: rotateX(270deg) rotateY(270deg); }
+    100% { transform: rotateX(360deg) rotateY(360deg); }
+  }
+</style>
+
+<script>
+  export default {
+    data: {
+      diceCount: 1,
+      diceArray: [1],
+      total: 0,
+      isRolling: false,
+      rollHistory: []
+    },
+    
+    onInit() {
+      this.updateDiceArray();
+    },
+    
+    setDiceCount(e) {
+      if (this.isRolling) return;
+      
+      this.diceCount = parseInt(e.target.attr.dataCount);
+      this.updateDiceArray();
+    },
+    
+    updateDiceArray() {
+      this.diceArray = Array(this.diceCount).fill(1);
+      this.total = 0;
+    },
+    
+    rollDice() {
+      if (this.isRolling) return;
+      
+      this.isRolling = true;
+      
+      setTimeout(() => {
+        // Générer nouveaux résultats
+        this.diceArray = Array(this.diceCount).fill(0).map(() => 
+          Math.floor(Math.random() * 6) + 1
+        );
+        
+        // Calculer total
+        this.total = this.diceArray.reduce((sum, dice) => sum + dice, 0);
+        
+        // Ajouter à l'historique
+        const historyEntry = this.diceCount === 1 ? 
+          `🎲 ${this.total}` : 
+          `🎲🎲 ${this.total} (${this.diceArray.join('+')})`;
+          
+        this.rollHistory.unshift(historyEntry);
+        
+        // Limiter l'historique à 5 entrées
+        if (this.rollHistory.length > 5) {
+          this.rollHistory = this.rollHistory.slice(0, 5);
+        }
+        
+        this.isRolling = false;
+      }, 800);
+    },
+    
+    goBack() {
+      this.$app.router.back();
+    }
+  }
+</script>

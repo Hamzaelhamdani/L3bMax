@@ -1,0 +1,474 @@
+<template>
+  <div class="container">
+    <div class="header">
+      <text class="back-btn" onclick="goBack">← Retour</text>
+      <text class="title">⚡ Tap Counter</text>
+    </div>
+    
+    <div class="game-area">
+      <div class="game-info">
+        <text class="timer">{{timeLeft}}s</text>
+        <text class="score">{{taps}} taps</text>
+        <text class="tps">{{tapsPerSecond}} TPS</text>
+      </div>
+      
+      <div class="instruction-area" if="{{!gameStarted && !gameOver}}">
+        <text class="instruction">Tapez le plus rapidement possible!</text>
+        <text class="sub-instruction">Vous avez {{gameDuration}}s pour faire le maximum de taps</text>
+        <text class="challenge">Défi: Atteignez {{targetTaps}} taps!</text>
+      </div>
+      
+      <div class="tap-area" if="{{gameStarted}}">
+        <div class="tap-button" onclick="tap">
+          <text class="tap-text">TAP!</text>
+          <text class="tap-count">{{taps}}</text>
+        </div>
+        <text class="combo-text" if="{{combo > 5}}">Combo x{{combo}}! 🔥</text>
+      </div>
+      
+      <div class="game-over" if="{{gameOver}}">
+        <text class="game-over-title">⚡ Temps Écoulé!</text>
+        <text class="final-score">{{taps}} taps en {{gameDuration}}s</text>
+        <text class="final-tps">Moyenne: {{averageTPS}} TPS</text>
+        <text class="achievement" if="{{taps >= targetTaps}}">🏆 Défi Réussi!</text>
+        <text class="encouragement" if="{{taps < targetTaps}}">💪 Encore {{targetTaps - taps}} taps pour le défi!</text>
+      </div>
+      
+      <div class="difficulty-selector" if="{{!gameStarted && !gameOver}}">
+        <text class="selector-label">Durée:</text>
+        <div class="difficulty-buttons">
+          <text class="diff-btn {{gameDuration === 10 ? 'active' : ''}}" onclick="setDuration" data-duration="10">10s</text>
+          <text class="diff-btn {{gameDuration === 20 ? 'active' : ''}}" onclick="setDuration" data-duration="20">20s</text>
+          <text class="diff-btn {{gameDuration === 30 ? 'active' : ''}}" onclick="setDuration" data-duration="30">30s</text>
+        </div>
+      </div>
+      
+      <div class="action-buttons">
+        <text class="start-btn" onclick="startGame" if="{{!gameStarted && !gameOver}}">⚡ Commencer</text>
+        <text class="restart-btn" onclick="restartGame" if="{{gameOver}}">Nouvelle Partie</text>
+      </div>
+      
+      <div class="records" if="{{bestScore > 0}}">
+        <text class="records-title">🏅 Records Personnels</text>
+        <text class="record-item">Meilleur: {{bestScore}} taps</text>
+        <text class="record-item">TPS Max: {{bestTPS}}</text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+  .container {
+    flex-direction: column;
+    background-color: #000000;
+    height: 100%;
+    padding: 20px;
+  }
+  
+  .header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .back-btn {
+    color: #FF7900;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 10px;
+  }
+  
+  .title {
+    color: #FFFFFF;
+    font-size: 24px;
+    font-weight: bold;
+    margin-left: 20px;
+  }
+  
+  .game-area {
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+  }
+  
+  .game-info {
+    flex-direction: row;
+    gap: 20px;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+  
+  .timer {
+    color: #FF7900;
+    font-size: 24px;
+    font-weight: bold;
+    padding: 10px 20px;
+    background-color: #333333;
+    border-radius: 25px;
+    min-width: 80px;
+    text-align: center;
+  }
+  
+  .score {
+    color: #FFFFFF;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 10px 20px;
+    background-color: #1a1a1a;
+    border-radius: 25px;
+  }
+  
+  .tps {
+    color: #00FF00;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 8px 15px;
+    background-color: #1a1a1a;
+    border-radius: 20px;
+  }
+  
+  .instruction-area {
+    flex-direction: column;
+    align-items: center;
+    margin: 30px 0;
+    text-align: center;
+  }
+  
+  .instruction {
+    color: #FFFFFF;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .sub-instruction {
+    color: #CCCCCC;
+    font-size: 16px;
+    margin-bottom: 15px;
+  }
+  
+  .challenge {
+    color: #FF7900;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .tap-area {
+    flex-direction: column;
+    align-items: center;
+    margin: 40px 0;
+  }
+  
+  .tap-button {
+    width: 200px;
+    height: 200px;
+    border-radius: 100px;
+    background: linear-gradient(45deg, #FF7900, #FF9933);
+    border: 5px solid #FFFFFF;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 20px rgba(255, 121, 0, 0.5);
+    position: relative;
+  }
+  
+  .tap-button:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 30px rgba(255, 121, 0, 0.8);
+  }
+  
+  .tap-text {
+    color: #FFFFFF;
+    font-size: 32px;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .tap-count {
+    color: #FFFFFF;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    position: absolute;
+    bottom: 30px;
+  }
+  
+  .combo-text {
+    color: #FF7900;
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 20px;
+    animation: pulse 0.5s ease-in-out infinite alternate;
+  }
+  
+  .game-over {
+    flex-direction: column;
+    align-items: center;
+    margin: 30px 0;
+    text-align: center;
+  }
+  
+  .game-over-title {
+    color: #FF7900;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+  
+  .final-score {
+    color: #FFFFFF;
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .final-tps {
+    color: #00FF00;
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+  
+  .achievement {
+    color: #FFD700;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  
+  .encouragement {
+    color: #CCCCCC;
+    font-size: 16px;
+  }
+  
+  .difficulty-selector {
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+  }
+  
+  .selector-label {
+    color: #FFFFFF;
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .difficulty-buttons {
+    flex-direction: row;
+    gap: 10px;
+  }
+  
+  .diff-btn {
+    padding: 10px 20px;
+    background-color: #333333;
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 20px;
+    text-align: center;
+    min-width: 60px;
+  }
+  
+  .diff-btn.active {
+    background-color: #FF7900;
+  }
+  
+  .action-buttons {
+    margin: 20px 0;
+  }
+  
+  .start-btn, .restart-btn {
+    padding: 20px 40px;
+    background-color: #FF7900;
+    color: #FFFFFF;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 10px;
+    text-align: center;
+  }
+  
+  .records {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 30px;
+  }
+  
+  .records-title {
+    color: #FFD700;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .record-item {
+    color: #CCCCCC;
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+  
+  @keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.1); }
+  }
+</style>
+
+<script>
+  export default {
+    data: {
+      gameStarted: false,
+      gameOver: false,
+      taps: 0,
+      timeLeft: 0,
+      gameDuration: 20,
+      targetTaps: 40,
+      tapsPerSecond: 0,
+      averageTPS: 0,
+      combo: 0,
+      lastTapTime: 0,
+      gameTimer: null,
+      tpsTimer: null,
+      bestScore: 0,
+      bestTPS: 0,
+      tapTimes: []
+    },
+    
+    onInit() {
+      // Charger les records depuis le localStorage si disponible
+      this.loadRecords();
+      this.calculateTarget();
+    },
+    
+    setDuration(e) {
+      if (this.gameStarted) return;
+      
+      this.gameDuration = parseInt(e.target.attr.dataDuration);
+      this.calculateTarget();
+    },
+    
+    calculateTarget() {
+      // Objectif basé sur la durée: 2 TPS minimum
+      this.targetTaps = this.gameDuration * 2;
+    },
+    
+    startGame() {
+      this.gameStarted = true;
+      this.gameOver = false;
+      this.taps = 0;
+      this.timeLeft = this.gameDuration;
+      this.tapsPerSecond = 0;
+      this.combo = 0;
+      this.tapTimes = [];
+      
+      this.startTimer();
+      this.startTpsCalculation();
+    },
+    
+    tap() {
+      if (!this.gameStarted || this.gameOver) return;
+      
+      const currentTime = Date.now();
+      this.taps++;
+      this.tapTimes.push(currentTime);
+      
+      // Calculer combo (taps rapides)
+      if (this.lastTapTime && currentTime - this.lastTapTime < 200) {
+        this.combo++;
+      } else {
+        this.combo = 1;
+      }
+      
+      this.lastTapTime = currentTime;
+      
+      // Garder seulement les taps des 2 dernières secondes pour le calcul TPS
+      const twoSecondsAgo = currentTime - 2000;
+      this.tapTimes = this.tapTimes.filter(time => time > twoSecondsAgo);
+    },
+    
+    startTimer() {
+      this.gameTimer = setInterval(() => {
+        this.timeLeft--;
+        
+        if (this.timeLeft <= 0) {
+          this.endGame();
+        }
+      }, 1000);
+    },
+    
+    startTpsCalculation() {
+      this.tpsTimer = setInterval(() => {
+        const now = Date.now();
+        const oneSecondAgo = now - 1000;
+        const recentTaps = this.tapTimes.filter(time => time > oneSecondAgo);
+        this.tapsPerSecond = recentTaps.length;
+      }, 100); // Mise à jour plus fréquente pour la fluidité
+    },
+    
+    endGame() {
+      this.gameOver = true;
+      this.gameStarted = false;
+      
+      if (this.gameTimer) {
+        clearInterval(this.gameTimer);
+        this.gameTimer = null;
+      }
+      
+      if (this.tpsTimer) {
+        clearInterval(this.tpsTimer);
+        this.tpsTimer = null;
+      }
+      
+      // Calculer TPS moyen
+      this.averageTPS = (this.taps / this.gameDuration).toFixed(1);
+      
+      // Sauvegarder les records
+      this.updateRecords();
+    },
+    
+    updateRecords() {
+      if (this.taps > this.bestScore) {
+        this.bestScore = this.taps;
+      }
+      
+      const currentTPS = parseFloat(this.averageTPS);
+      if (currentTPS > this.bestTPS) {
+        this.bestTPS = currentTPS;
+      }
+      
+      this.saveRecords();
+    },
+    
+    loadRecords() {
+      // Simuler localStorage avec des variables internes
+      if (typeof this.bestScore === 'undefined') {
+        this.bestScore = 0;
+        this.bestTPS = 0;
+      }
+    },
+    
+    saveRecords() {
+      // Dans une vraie app, on sauvegarderait dans localStorage
+      // localStorage.setItem('tapCounterBestScore', this.bestScore);
+      // localStorage.setItem('tapCounterBestTPS', this.bestTPS);
+    },
+    
+    restartGame() {
+      this.startGame();
+    },
+    
+    goBack() {
+      if (this.gameTimer) {
+        clearInterval(this.gameTimer);
+      }
+      if (this.tpsTimer) {
+        clearInterval(this.tpsTimer);
+      }
+      this.$app.router.back();
+    },
+    
+    onDestroy() {
+      if (this.gameTimer) {
+        clearInterval(this.gameTimer);
+      }
+      if (this.tpsTimer) {
+        clearInterval(this.tpsTimer);
+      }
+    }
+  }
+</script>

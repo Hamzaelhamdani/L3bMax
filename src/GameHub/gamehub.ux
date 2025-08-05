@@ -1,0 +1,325 @@
+<template>
+  <div          <div class="game-card" onclick="openGame('MemoryCards')">
+            <text class="game-icon">🃏</text>
+            <text class="game-name">Memory Cards</text>
+          </div>ss="game-hub-container">
+    <!-- Header -->
+    <div class="header">
+      <text class="app-title">L3bMax Game Hub</text>
+      <text class="subtitle">Orange Telecom Gaming</text>
+    </div>
+
+    <!-- Games Grid -->
+    <list class="games-grid">
+      <!-- Jeux de Réflexion -->
+      <list-item class="category-section">
+        <text class="category-title">🧠 Jeux de Réflexion</text>
+        <div class="games-row">
+          <div class="game-card" onclick="openGame('tictactoe')">
+            <text class="game-icon">⭕</text>
+            <text class="game-name">Tic-Tac-Toe</text>
+          </div>
+          <div class="game-card" onclick="openGame('memory')">
+            <text class="game-icon">🃏</text>
+            <text class="game-name">Memory Cards</text>
+          </div>
+          <div class="game-card" onclick="openGame('simon')">
+            <text class="game-icon">🔴</text>
+            <text class="game-name">Simon Says</text>
+          </div>
+        </div>
+        <div class="games-row">
+          <div class="game-card" onclick="openGame('puzzle')">
+            <text class="game-icon">🧩</text>
+            <text class="game-name">Number Puzzle</text>
+          </div>
+          <div class="game-card" onclick="openGame('wordguess')">
+            <text class="game-icon">🔤</text>
+            <text class="game-name">Word Guess</text>
+          </div>
+          <div class="game-card" onclick="openGame('connect4')">
+            <text class="game-icon">🔴</text>
+            <text class="game-name">Connect Four</text>
+          </div>
+        </div>
+        <div class="games-row">
+          <div class="game-card" onclick="openGame('sudoku')">
+            <text class="game-icon">🔢</text>
+            <text class="game-name">Sudoku Mini</text>
+          </div>
+          <div class="game-card" onclick="openGame('pattern')">
+            <text class="game-icon">🎨</text>
+            <text class="game-name">Pattern Match</text>
+          </div>
+          <div class="game-card" onclick="openGame('logic')">
+            <text class="game-icon">⚡</text>
+            <text class="game-name">Logic Gates</text>
+          </div>
+        </div>
+        <div class="games-row">
+          <div class="game-card" onclick="openGame('maze')">
+            <text class="game-icon">🌀</text>
+            <text class="game-name">Maze Runner</text>
+          </div>
+        </div>
+      </list-item>
+
+      <!-- Jeux de Rapidité -->
+      <list-item class="category-section">
+        <text class="category-title">⚡ Jeux de Rapidité</text>
+        <div class="games-row">
+          <div class="game-card" onclick="openGame('ColorMatch')">
+            <text class="game-icon">🌈</text>
+            <text class="game-name">Color Match</text>
+          </div>
+          <div class="game-card" onclick="openGame('TapCounter')">
+            <text class="game-icon">👆</text>
+            <text class="game-name">Tap Counter</text>
+          </div>
+          <div class="game-card" onclick="openGame('reaction')">
+            <text class="game-icon">⚡</text>
+            <text class="game-name">Reaction Time</text>
+          </div>
+        </div>
+        <div class="games-row">
+          <div class="game-card" onclick="openGame('bubblepop')">
+            <text class="game-icon">🫧</text>
+            <text class="game-name">Bubble Pop</text>
+          </div>
+          <div class="game-card" onclick="openGame('catchdot')">
+            <text class="game-icon">🎯</text>
+            <text class="game-name">Catch the Dot</text>
+          </div>
+          <div class="game-card" onclick="openGame('speedmath')">
+            <text class="game-icon">🔢</text>
+            <text class="game-name">Speed Math</text>
+          </div>
+        </div>
+        <div class="games-row">
+          <div class="game-card" onclick="openGame('typefast')">
+            <text class="game-icon">⌨️</text>
+            <text class="game-name">Type Fast</text>
+          </div>
+          <div class="game-card" onclick="openGame('swipe')">
+            <text class="game-icon">👈</text>
+            <text class="game-name">Swipe Direction</text>
+          </div>
+          <div class="game-card" onclick="openGame('quickdraw')">
+            <text class="game-icon">✏️</text>
+            <text class="game-name">Quick Draw</text>
+          </div>
+        </div>
+        <div class="games-row">
+          <div class="game-card" onclick="openGame('beatclock')">
+            <text class="game-icon">⏰</text>
+            <text class="game-name">Beat the Clock</text>
+          </div>
+        </div>
+      </list-item>
+
+      <!-- Jeux de Chance & Fun -->
+      <list-item class="category-section">
+        <text class="category-title">🎲 Jeux de Chance & Fun</text>
+        <div class="games-row">
+          <div class="game-card" onclick="openGame('RockPaperScissors')">
+            <text class="game-icon">✂️</text>
+            <text class="game-name">Rock Paper Scissors</text>
+          </div>
+          <div class="game-card" onclick="openGame('CoinFlip')">
+            <text class="game-icon">🪙</text>
+            <text class="game-name">Coin Flip</text>
+          </div>
+          <div class="game-card" onclick="openGame('DiceRoll')">
+            <text class="game-icon">🎲</text>
+            <text class="game-name">Dice Roll</text>
+          </div>
+        </div>
+        <div class="games-row">
+          <div class="game-card" onclick="openGame('luckynumber')">
+            <text class="game-icon">🔮</text>
+            <text class="game-name">Lucky Number</text>
+          </div>
+          <div class="game-card" onclick="openGame('colorseq')">
+            <text class="game-icon">🎨</text>
+            <text class="game-name">Color Sequence</text>
+          </div>
+          <div class="game-card" onclick="openGame('spinwheel')">
+            <text class="game-icon">🎡</text>
+            <text class="game-name">Spin Wheel</text>
+          </div>
+        </div>
+        <div class="games-row">
+          <div class="game-card" onclick="openGame('carddraw')">
+            <text class="game-icon">🃏</text>
+            <text class="game-name">Card Draw</text>
+          </div>
+          <div class="game-card" onclick="openGame('Magic8Ball')">
+            <text class="game-icon">🎱</text>
+            <text class="game-name">Magic 8 Ball</text>
+          </div>
+          <div class="game-card" onclick="openGame('lottery')">
+            <text class="game-icon">🎟️</text>
+            <text class="game-name">Lottery Picker</text>
+          </div>
+        </div>
+        <div class="games-row">
+          <div class="game-card" onclick="openGame('fortune')">
+            <text class="game-icon">🥠</text>
+            <text class="game-name">Fortune Cookie</text>
+          </div>
+        </div>
+      </list-item>
+    </list>
+
+    <!-- Footer Stats -->
+    <div class="footer">
+      <text class="stats-text">30 Jeux Disponibles • Orange Telecom</text>
+      <text class="version-text">v1.0.0 • Maxit Gaming Platform</text>
+    </div>
+  </div>
+</template>
+
+<style>
+  .game-hub-container {
+    flex-direction: column;
+    background-color: #FFFFFF;
+    padding: 20px;
+  }
+
+  .header {
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, #FF7900 0%, #FF9500 100%);
+    border-radius: 15px;
+  }
+
+  .app-title {
+    font-size: 32px;
+    font-weight: bold;
+    color: #FFFFFF;
+    margin-bottom: 5px;
+    text-align: center;
+  }
+
+  .subtitle {
+    font-size: 16px;
+    color: #FFFFFF;
+    opacity: 0.9;
+    text-align: center;
+  }
+
+  .games-grid {
+    flex-direction: column;
+  }
+
+  .category-section {
+    margin-bottom: 25px;
+  }
+
+  .category-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #FF7900;
+    margin-bottom: 15px;
+    padding-left: 10px;
+  }
+
+  .games-row {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 15px;
+  }
+
+  .game-card {
+    width: 100px;
+    height: 100px;
+    background-color: #FFFFFF;
+    border: 2px solid #FF7900;
+    border-radius: 12px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 5px;
+    box-shadow: 0 2px 8px rgba(255, 121, 0, 0.2);
+  }
+
+  .game-card:active {
+    background-color: #FFE6CC;
+    transform: scale(0.95);
+  }
+
+  .game-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+
+  .game-name {
+    font-size: 10px;
+    font-weight: bold;
+    color: #FF7900;
+    text-align: center;
+    lines: 2;
+  }
+
+  .footer {
+    align-items: center;
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #F8F9FA;
+    border-radius: 10px;
+  }
+
+  .stats-text {
+    font-size: 14px;
+    color: #FF7900;
+    font-weight: bold;
+    margin-bottom: 5px;
+    text-align: center;
+  }
+
+  .version-text {
+    font-size: 12px;
+    color: #666666;
+    text-align: center;
+  }
+</style>
+
+<script>
+  export default {
+    data: {
+      currentGame: null
+    },
+    onInit() {
+      this.$page.setTitleBar({
+        text: 'L3bMax Game Hub - Orange Telecom',
+        textColor: '#ffffff',
+        backgroundColor: '#FF7900',
+        backgroundOpacity: 1.0,
+        menu: true
+      });
+    },
+    openGame(gameId) {
+      console.log('Opening game:', gameId);
+      
+      // Pour l'instant, seul Tic-Tac-Toe est implémenté
+      if (gameId === 'tictactoe') {
+        this.$router.push({
+          uri: '/Hello'
+        });
+      } else {
+        // Message pour les jeux pas encore implémentés
+        this.$prompt.showDialog({
+          title: 'Jeu en développement',
+          message: `Le jeu "${gameId}" sera bientôt disponible ! 🎮\n\nPour l'instant, jouez au Tic-Tac-Toe.`,
+          buttons: [
+            {
+              text: 'OK',
+              color: '#FF7900'
+            }
+          ]
+        });
+      }
+    }
+  }
+</script>

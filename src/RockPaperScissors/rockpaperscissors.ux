@@ -1,0 +1,452 @@
+<template>
+  <div class="container">
+    <div class="header">
+      <text class="back-btn" onclick="goBack">← Retour</text>
+      <text class="title">✂️ Pierre Papier Ciseaux</text>
+    </div>
+    
+    <div class="game-area">
+      <div class="score-area">
+        <div class="score-item">
+          <text class="score-label">Vous</text>
+          <text class="score-value">{{playerScore}}</text>
+        </div>
+        <div class="vs-text">VS</div>
+        <div class="score-item">
+          <text class="score-label">IA</text>
+          <text class="score-value">{{computerScore}}</text>
+        </div>
+      </div>
+      
+      <div class="game-display" if="{{gameResult}}">
+        <div class="choices-display">
+          <div class="choice-container">
+            <text class="choice-label">Vous</text>
+            <div class="choice-icon">{{playerChoiceIcon}}</div>
+            <text class="choice-name">{{playerChoice}}</text>
+          </div>
+          
+          <div class="result-display">
+            <text class="result-text">{{gameResult}}</text>
+            <text class="result-emoji">{{resultEmoji}}</text>
+          </div>
+          
+          <div class="choice-container">
+            <text class="choice-label">IA</text>
+            <div class="choice-icon">{{computerChoiceIcon}}</div>
+            <text class="choice-name">{{computerChoice}}</text>
+          </div>
+        </div>
+      </div>
+      
+      <div class="instruction" if="{{!gameResult}}">
+        <text class="instruction-text">Choisissez votre option:</text>
+      </div>
+      
+      <div class="choices-grid">
+        <div class="choice-button" onclick="makeChoice" data-choice="Pierre">
+          <text class="choice-emoji">🪨</text>
+          <text class="choice-text">Pierre</text>
+        </div>
+        <div class="choice-button" onclick="makeChoice" data-choice="Papier">
+          <text class="choice-emoji">📄</text>
+          <text class="choice-text">Papier</text>
+        </div>
+        <div class="choice-button" onclick="makeChoice" data-choice="Ciseaux">
+          <text class="choice-emoji">✂️</text>
+          <text class="choice-text">Ciseaux</text>
+        </div>
+      </div>
+      
+      <div class="action-buttons" if="{{gameResult}}">
+        <text class="play-again-btn" onclick="playAgain">Jouer Encore</text>
+        <text class="reset-btn" onclick="resetGame" if="{{totalGames >= 3}}">Nouveau Match</text>
+      </div>
+      
+      <div class="game-stats" if="{{totalGames > 0}}">
+        <text class="stats-title">📊 Statistiques</text>
+        <div class="stats-grid">
+          <text class="stat-item">Parties: {{totalGames}}</text>
+          <text class="stat-item">Victoires: {{playerWins}}</text>
+          <text class="stat-item">Ratio: {{winPercentage}}%</text>
+        </div>
+      </div>
+      
+      <div class="rules" if="{{showRules}}">
+        <text class="rules-title">📋 Règles</text>
+        <text class="rule-item">🪨 Pierre bat ✂️ Ciseaux</text>
+        <text class="rule-item">📄 Papier bat 🪨 Pierre</text>
+        <text class="rule-item">✂️ Ciseaux bat 📄 Papier</text>
+      </div>
+      
+      <text class="toggle-rules" onclick="toggleRules">
+        {{showRules ? '🔼 Masquer règles' : '🔽 Voir règles'}}
+      </text>
+    </div>
+  </div>
+</template>
+
+<style>
+  .container {
+    flex-direction: column;
+    background-color: #000000;
+    height: 100%;
+    padding: 20px;
+  }
+  
+  .header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .back-btn {
+    color: #FF7900;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 10px;
+  }
+  
+  .title {
+    color: #FFFFFF;
+    font-size: 24px;
+    font-weight: bold;
+    margin-left: 20px;
+  }
+  
+  .game-area {
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+  }
+  
+  .score-area {
+    flex-direction: row;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 30px;
+  }
+  
+  .score-item {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .score-label {
+    color: #CCCCCC;
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+  
+  .score-value {
+    color: #FF7900;
+    font-size: 28px;
+    font-weight: bold;
+    padding: 10px 20px;
+    background-color: #1a1a1a;
+    border-radius: 20px;
+    min-width: 60px;
+    text-align: center;
+  }
+  
+  .vs-text {
+    color: #FFFFFF;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  
+  .game-display {
+    margin: 20px 0;
+    width: 100%;
+  }
+  
+  .choices-display {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .choice-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .choice-label {
+    color: #CCCCCC;
+    font-size: 14px;
+  }
+  
+  .choice-icon {
+    font-size: 48px;
+    margin: 10px 0;
+  }
+  
+  .choice-name {
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  .result-display {
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+  }
+  
+  .result-text {
+    color: #FF7900;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .result-emoji {
+    font-size: 32px;
+  }
+  
+  .instruction {
+    margin: 20px 0;
+  }
+  
+  .instruction-text {
+    color: #FFFFFF;
+    font-size: 18px;
+    text-align: center;
+  }
+  
+  .choices-grid {
+    flex-direction: row;
+    gap: 20px;
+    margin: 30px 0;
+  }
+  
+  .choice-button {
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 15px;
+    background-color: #1a1a1a;
+    border: 3px solid #FF7900;
+    border-radius: 15px;
+    min-width: 80px;
+  }
+  
+  .choice-button:active {
+    background-color: #FF7900;
+  }
+  
+  .choice-emoji {
+    font-size: 32px;
+    margin-bottom: 10px;
+  }
+  
+  .choice-text {
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .action-buttons {
+    flex-direction: row;
+    gap: 15px;
+    margin: 20px 0;
+  }
+  
+  .play-again-btn {
+    padding: 15px 25px;
+    background-color: #FF7900;
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  .reset-btn {
+    padding: 15px 25px;
+    background-color: #666666;
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  .game-stats {
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #1a1a1a;
+    border-radius: 10px;
+    width: 280px;
+  }
+  
+  .stats-title {
+    color: #FF7900;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .stats-grid {
+    flex-direction: row;
+    gap: 20px;
+  }
+  
+  .stat-item {
+    color: #FFFFFF;
+    font-size: 14px;
+    text-align: center;
+  }
+  
+  .rules {
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #0a0a0a;
+    border-radius: 10px;
+    width: 280px;
+  }
+  
+  .rules-title {
+    color: #FF7900;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .rule-item {
+    color: #CCCCCC;
+    font-size: 14px;
+    margin-bottom: 5px;
+    text-align: center;
+  }
+  
+  .toggle-rules {
+    color: #FF7900;
+    font-size: 14px;
+    margin-top: 10px;
+    text-align: center;
+  }
+</style>
+
+<script>
+  export default {
+    data: {
+      playerScore: 0,
+      computerScore: 0,
+      playerChoice: '',
+      computerChoice: '',
+      playerChoiceIcon: '',
+      computerChoiceIcon: '',
+      gameResult: '',
+      resultEmoji: '',
+      totalGames: 0,
+      playerWins: 0,
+      winPercentage: 0,
+      showRules: false,
+      choices: {
+        'Pierre': '🪨',
+        'Papier': '📄',
+        'Ciseaux': '✂️'
+      }
+    },
+    
+    makeChoice(e) {
+      const playerChoice = e.target.attr.dataChoice;
+      const computerChoice = this.getComputerChoice();
+      
+      this.playerChoice = playerChoice;
+      this.computerChoice = computerChoice;
+      this.playerChoiceIcon = this.choices[playerChoice];
+      this.computerChoiceIcon = this.choices[computerChoice];
+      
+      this.totalGames++;
+      
+      const result = this.determineWinner(playerChoice, computerChoice);
+      this.gameResult = result.text;
+      this.resultEmoji = result.emoji;
+      
+      if (result.playerWins) {
+        this.playerScore++;
+        this.playerWins++;
+      } else if (result.computerWins) {
+        this.computerScore++;
+      }
+      
+      this.updateStats();
+    },
+    
+    getComputerChoice() {
+      const choices = ['Pierre', 'Papier', 'Ciseaux'];
+      return choices[Math.floor(Math.random() * choices.length)];
+    },
+    
+    determineWinner(player, computer) {
+      if (player === computer) {
+        return {
+          text: 'Égalité!',
+          emoji: '🤝',
+          playerWins: false,
+          computerWins: false
+        };
+      }
+      
+      const winConditions = {
+        'Pierre': 'Ciseaux',
+        'Papier': 'Pierre', 
+        'Ciseaux': 'Papier'
+      };
+      
+      if (winConditions[player] === computer) {
+        return {
+          text: 'Vous gagnez!',
+          emoji: '🎉',
+          playerWins: true,
+          computerWins: false
+        };
+      } else {
+        return {
+          text: 'IA gagne!',
+          emoji: '😔',
+          playerWins: false,
+          computerWins: true
+        };
+      }
+    },
+    
+    updateStats() {
+      this.winPercentage = this.totalGames > 0 ? 
+        Math.round((this.playerWins / this.totalGames) * 100) : 0;
+    },
+    
+    playAgain() {
+      this.gameResult = '';
+      this.playerChoice = '';
+      this.computerChoice = '';
+      this.playerChoiceIcon = '';
+      this.computerChoiceIcon = '';
+      this.resultEmoji = '';
+    },
+    
+    resetGame() {
+      this.playerScore = 0;
+      this.computerScore = 0;
+      this.totalGames = 0;
+      this.playerWins = 0;
+      this.winPercentage = 0;
+      this.playAgain();
+    },
+    
+    toggleRules() {
+      this.showRules = !this.showRules;
+    },
+    
+    goBack() {
+      this.$app.router.back();
+    }
+  }
+</script>

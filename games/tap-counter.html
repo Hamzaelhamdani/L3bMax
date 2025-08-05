@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tap Counter - L3bMax</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #000, #1a1a1a);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: 28px;
+            color: #FF7900;
+            margin-bottom: 30px;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FF7900;
+        }
+
+        .tap-circle {
+            width: 200px;
+            height: 200px;
+            margin: 30px auto;
+            background: linear-gradient(45deg, #FF7900, #e66900);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.1s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tap-circle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 121, 0, 0.5);
+        }
+
+        .tap-circle:active {
+            transform: scale(0.95);
+        }
+
+        .tap-circle.tapped {
+            animation: tapEffect 0.3s ease;
+        }
+
+        @keyframes tapEffect {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); box-shadow: 0 0 50px rgba(255, 121, 0, 0.8); }
+            100% { transform: scale(1); }
+        }
+
+        .tap-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .challenge-mode {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #1a1a1a;
+            border-radius: 10px;
+            border: 2px solid #333;
+        }
+
+        .challenge-title {
+            font-size: 18px;
+            color: #FF7900;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #333;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF7900, #00ff88);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .challenge-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #CCCCCC;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .control-btn {
+            padding: 12px 24px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background-color: #555;
+        }
+
+        .control-btn.primary {
+            background-color: #FF7900;
+        }
+
+        .control-btn.primary:hover {
+            background-color: #e66900;
+        }
+
+        .game-message {
+            font-size: 18px;
+            margin-bottom: 20px;
+            min-height: 25px;
+            color: #FF7900;
+        }
+
+        .best-scores {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #1a1a1a;
+            border-radius: 10px;
+        }
+
+        .best-scores h3 {
+            color: #FF7900;
+            margin-bottom: 15px;
+        }
+
+        .score-list {
+            display: flex;
+            justify-content: space-around;
+            font-size: 14px;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .floating-plus {
+            position: absolute;
+            color: #00ff88;
+            font-size: 24px;
+            font-weight: bold;
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">👆 Tap Counter</h1>
+        
+        <div class="game-stats">
+            <div class="stat-item">
+                <div>Taps</div>
+                <div class="stat-value" id="tapCount">0</div>
+            </div>
+            <div class="stat-item">
+                <div>TPS</div>
+                <div class="stat-value" id="tapsPerSecond">0.0</div>
+            </div>
+            <div class="stat-item">
+                <div>Temps</div>
+                <div class="stat-value" id="gameTime">0s</div>
+            </div>
+        </div>
+
+        <div class="game-message" id="gameMessage">Tapez aussi vite que possible!</div>
+
+        <div class="tap-circle" id="tapCircle" onclick="handleTap(event)">
+            <div class="tap-text">TAP!</div>
+        </div>
+
+        <div class="challenge-mode">
+            <div class="challenge-title">Défi 10 secondes</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="challengeProgress"></div>
+            </div>
+            <div class="challenge-info">
+                <span>Objectif: <span id="challengeTarget">50</span> taps</span>
+                <span>Temps: <span id="challengeTime">10s</span></span>
+            </div>
+        </div>
+
+        <div class="control-buttons">
+            <button class="control-btn primary" onclick="startChallenge()">Défi 10s</button>
+            <button class="control-btn" onclick="resetStats()">Reset</button>
+            <button class="control-btn" onclick="toggleMode()">Mode Libre</button>
+        </div>
+
+        <div class="best-scores">
+            <h3>Meilleurs Scores</h3>
+            <div class="score-list">
+                <div class="score-item">
+                    <div>Record 10s</div>
+                    <div class="stat-value" id="best10s">0</div>
+                </div>
+                <div class="score-item">
+                    <div>Max TPS</div>
+                    <div class="stat-value" id="bestTPS">0.0</div>
+                </div>
+                <div class="score-item">
+                    <div>Total</div>
+                    <div class="stat-value" id="totalTaps">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tapCount = 0;
+        let gameTime = 0;
+        let gameTimer;
+        let challengeActive = false;
+        let challengeTime = 10;
+        let challengeTarget = 50;
+        let tapsHistory = [];
+        let gameMode = 'libre'; // 'libre' ou 'challenge'
+
+        // Best scores (stored in localStorage)
+        let bestScores = {
+            best10s: parseInt(localStorage.getItem('tapBest10s')) || 0,
+            bestTPS: parseFloat(localStorage.getItem('tapBestTPS')) || 0,
+            totalTaps: parseInt(localStorage.getItem('tapTotalTaps')) || 0
+        };
+
+        function handleTap(event) {
+            tapCount++;
+            tapsHistory.push(Date.now());
+            
+            // Keep only last 10 seconds of taps for TPS calculation
+            const tenSecondsAgo = Date.now() - 10000;
+            tapsHistory = tapsHistory.filter(time => time > tenSecondsAgo);
+            
+            // Animation effect
+            const circle = document.getElementById('tapCircle');
+            circle.classList.add('tapped');
+            setTimeout(() => circle.classList.remove('tapped'), 300);
+            
+            // Floating +1 effect
+            createFloatingPlus(event);
+            
+            // Update displays
+            updateDisplay();
+            updateBestScores();
+            
+            // Start timer on first tap if not already running
+            if (!gameTimer && !challengeActive) {
+                startGameTimer();
+            }
+        }
+
+        function createFloatingPlus(event) {
+            const plus = document.createElement('div');
+            plus.className = 'floating-plus';
+            plus.textContent = '+1';
+            
+            const rect = document.getElementById('tapCircle').getBoundingClientRect();
+            plus.style.left = (event.clientX - rect.left) + 'px';
+            plus.style.top = (event.clientY - rect.top) + 'px';
+            
+            document.getElementById('tapCircle').appendChild(plus);
+            
+            setTimeout(() => plus.remove(), 1000);
+        }
+
+        function startGameTimer() {
+            gameTimer = setInterval(() => {
+                gameTime++;
+                updateDisplay();
+            }, 1000);
+        }
+
+        function startChallenge() {
+            if (challengeActive) return;
+            
+            challengeActive = true;
+            tapCount = 0;
+            gameTime = 0;
+            challengeTime = 10;
+            tapsHistory = [];
+            
+            document.getElementById('gameMessage').textContent = 
+                `Défi actif! Objectif: ${challengeTarget} taps en 10s`;
+            
+            const challengeTimer = setInterval(() => {
+                challengeTime--;
+                updateChallengeProgress();
+                
+                if (challengeTime <= 0) {
+                    endChallenge();
+                    clearInterval(challengeTimer);
+                }
+            }, 1000);
+            
+            startGameTimer();
+        }
+
+        function endChallenge() {
+            challengeActive = false;
+            clearInterval(gameTimer);
+            gameTimer = null;
+            
+            const success = tapCount >= challengeTarget;
+            const message = success ? 
+                `Défi réussi! ${tapCount}/${challengeTarget} taps` :
+                `Défi échoué: ${tapCount}/${challengeTarget} taps`;
+            
+            document.getElementById('gameMessage').textContent = message;
+            
+            if (success && tapCount > bestScores.best10s) {
+                bestScores.best10s = tapCount;
+                localStorage.setItem('tapBest10s', tapCount);
+                document.getElementById('gameMessage').textContent += ' - Nouveau record!';
+            }
+            
+            updateDisplay();
+            updateBestScores();
+        }
+
+        function updateChallengeProgress() {
+            const progress = Math.min((tapCount / challengeTarget) * 100, 100);
+            document.getElementById('challengeProgress').style.width = progress + '%';
+            document.getElementById('challengeTime').textContent = challengeTime + 's';
+        }
+
+        function calculateTPS() {
+            if (tapsHistory.length < 2) return 0;
+            
+            const timeSpan = Math.max(1, (Date.now() - tapsHistory[0]) / 1000);
+            return (tapsHistory.length / timeSpan).toFixed(1);
+        }
+
+        function updateDisplay() {
+            document.getElementById('tapCount').textContent = tapCount;
+            document.getElementById('gameTime').textContent = gameTime + 's';
+            
+            const tps = calculateTPS();
+            document.getElementById('tapsPerSecond').textContent = tps;
+            
+            if (parseFloat(tps) > bestScores.bestTPS) {
+                bestScores.bestTPS = parseFloat(tps);
+                localStorage.setItem('tapBestTPS', bestScores.bestTPS);
+            }
+        }
+
+        function updateBestScores() {
+            bestScores.totalTaps++;
+            localStorage.setItem('tapTotalTaps', bestScores.totalTaps);
+            
+            document.getElementById('best10s').textContent = bestScores.best10s;
+            document.getElementById('bestTPS').textContent = bestScores.bestTPS.toFixed(1);
+            document.getElementById('totalTaps').textContent = bestScores.totalTaps;
+        }
+
+        function resetStats() {
+            tapCount = 0;
+            gameTime = 0;
+            tapsHistory = [];
+            challengeActive = false;
+            
+            if (gameTimer) {
+                clearInterval(gameTimer);
+                gameTimer = null;
+            }
+            
+            document.getElementById('gameMessage').textContent = 'Statistiques remises à zéro!';
+            document.getElementById('challengeProgress').style.width = '0%';
+            document.getElementById('challengeTime').textContent = '10s';
+            
+            updateDisplay();
+        }
+
+        function toggleMode() {
+            gameMode = gameMode === 'libre' ? 'challenge' : 'libre';
+            const btn = event.target;
+            btn.textContent = gameMode === 'libre' ? 'Mode Libre' : 'Mode Défi';
+            
+            if (gameMode === 'libre') {
+                challengeTarget = Math.max(10, challengeTarget - 10);
+            } else {
+                challengeTarget = Math.min(100, challengeTarget + 10);
+            }
+            
+            document.getElementById('challengeTarget').textContent = challengeTarget;
+        }
+
+        // Initialize display
+        document.addEventListener('DOMContentLoaded', () => {
+            updateBestScores();
+            updateDisplay();
+        });
+    </script>
+</body>
+</html>

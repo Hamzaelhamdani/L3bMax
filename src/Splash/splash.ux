@@ -161,9 +161,9 @@
     },
     
     navigateToGame() {
-      console.info('Navigating to L3bMax Game');
+      console.info('Navigating to L3bMax Game Hub');
       this.$app.router.push({
-        uri: '/Hello'
+        uri: '/GameHub'
       });
     },
     

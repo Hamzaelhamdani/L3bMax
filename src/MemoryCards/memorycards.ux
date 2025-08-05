@@ -1,0 +1,526 @@
+<template>
+  <div class="container">
+    <div class="header">
+      <text class="back-btn" onclick="goBack">← Retour</text>
+      <text class="title">🃏 Memory Cards</text>
+    </div>
+    
+    <div class="game-area">
+      <div class="game-info">
+        <text class="moves">Mouvements: {{moves}}</text>
+        <text class="pairs">Paires: {{foundPairs}}/{{totalPairs}}</text>
+        <text class="timer">{{timeElapsed}}s</text>
+      </div>
+      
+      <div class="instruction" if="{{!gameStarted}}">
+        <text class="instruction-text">Trouvez toutes les paires!</text>
+        <text class="sub-instruction">Mémorisez les cartes et trouvez les correspondances</text>
+      </div>
+      
+      <div class="cards-grid" if="{{gameStarted}}">
+        <div class="card {{card.isFlipped ? 'flipped' : ''}} {{card.isMatched ? 'matched' : ''}}" 
+             for="{{(index, card) in cards}}" 
+             onclick="flipCard" 
+             data-index="{{index}}">
+          <div class="card-front">
+            <text class="card-icon">{{card.isFlipped || card.isMatched ? card.icon : '❓'}}</text>
+          </div>
+        </div>
+      </div>
+      
+      <div class="level-selector" if="{{!gameStarted && !gameOver}}">
+        <text class="selector-label">Difficulté:</text>
+        <div class="level-buttons">
+          <text class="level-btn {{difficulty === 'easy' ? 'active' : ''}}" onclick="setDifficulty" data-level="easy">Facile (8)</text>
+          <text class="level-btn {{difficulty === 'medium' ? 'active' : ''}}" onclick="setDifficulty" data-level="medium">Moyen (12)</text>
+          <text class="level-btn {{difficulty === 'hard' ? 'active' : ''}}" onclick="setDifficulty" data-level="hard">Difficile (16)</text>
+        </div>
+      </div>
+      
+      <div class="game-over" if="{{gameOver}}">
+        <text class="game-over-title">🎉 Félicitations!</text>
+        <text class="completion-text">Toutes les paires trouvées!</text>
+        <div class="final-stats">
+          <text class="stat-final">⏱️ Temps: {{timeElapsed}}s</text>
+          <text class="stat-final">🔄 Mouvements: {{moves}}</text>
+          <text class="stat-final">⭐ Score: {{score}}</text>
+        </div>
+        <text class="performance">{{getPerformanceText()}}</text>
+      </div>
+      
+      <div class="action-buttons">
+        <text class="start-btn" onclick="startGame" if="{{!gameStarted && !gameOver}}">🃏 Commencer</text>
+        <text class="restart-btn" onclick="restartGame" if="{{gameOver}}">Nouvelle Partie</text>
+        <text class="hint-btn" onclick="showHint" if="{{gameStarted && !gameOver && hintAvailable}}">💡 Indice ({{hintsLeft}})</text>
+      </div>
+      
+      <div class="best-scores" if="{{bestTime > 0}}">
+        <text class="scores-title">🏆 Meilleurs Scores</text>
+        <text class="best-item">⏱️ Temps: {{bestTime}}s</text>
+        <text class="best-item">🔄 Mouvements: {{bestMoves}}</text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+  .container {
+    flex-direction: column;
+    background-color: #000000;
+    height: 100%;
+    padding: 20px;
+  }
+  
+  .header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .back-btn {
+    color: #FF7900;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 10px;
+  }
+  
+  .title {
+    color: #FFFFFF;
+    font-size: 24px;
+    font-weight: bold;
+    margin-left: 20px;
+  }
+  
+  .game-area {
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+  }
+  
+  .game-info {
+    flex-direction: row;
+    gap: 15px;
+    margin-bottom: 15px;
+    align-items: center;
+  }
+  
+  .moves, .pairs, .timer {
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 6px 12px;
+    background-color: #333333;
+    border-radius: 15px;
+  }
+  
+  .timer {
+    color: #FF7900;
+  }
+  
+  .instruction {
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+    text-align: center;
+  }
+  
+  .instruction-text {
+    color: #FFFFFF;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  
+  .sub-instruction {
+    color: #CCCCCC;
+    font-size: 14px;
+  }
+  
+  .cards-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    max-width: 320px;
+    margin: 15px 0;
+  }
+  
+  .card {
+    width: 65px;
+    height: 65px;
+    background-color: #333333;
+    border-radius: 8px;
+    border: 2px solid #666666;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  
+  .card.flipped {
+    background-color: #FF7900;
+    border-color: #FF7900;
+    animation: flip 0.3s ease-in-out;
+  }
+  
+  .card.matched {
+    background-color: #00AA00;
+    border-color: #00AA00;
+    opacity: 0.7;
+  }
+  
+  .card-front {
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .card-icon {
+    font-size: 24px;
+    text-align: center;
+  }
+  
+  .level-selector {
+    flex-direction: column;
+    align-items: center;
+    margin: 15px 0;
+  }
+  
+  .selector-label {
+    color: #FFFFFF;
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .level-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .level-btn {
+    padding: 8px 16px;
+    background-color: #333333;
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 15px;
+    text-align: center;
+    min-width: 120px;
+  }
+  
+  .level-btn.active {
+    background-color: #FF7900;
+  }
+  
+  .game-over {
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+    text-align: center;
+  }
+  
+  .game-over-title {
+    color: #FF7900;
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  
+  .completion-text {
+    color: #FFFFFF;
+    font-size: 16px;
+    margin-bottom: 15px;
+  }
+  
+  .final-stats {
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+  
+  .stat-final {
+    color: #CCCCCC;
+    font-size: 14px;
+  }
+  
+  .performance {
+    color: #FFD700;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  .action-buttons {
+    flex-direction: row;
+    gap: 10px;
+    margin: 15px 0;
+  }
+  
+  .start-btn, .restart-btn, .hint-btn {
+    padding: 12px 20px;
+    background-color: #FF7900;
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  .hint-btn {
+    background-color: #FFD700;
+    color: #000000;
+  }
+  
+  .best-scores {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    width: 200px;
+  }
+  
+  .scores-title {
+    color: #FFD700;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  
+  .best-item {
+    color: #CCCCCC;
+    font-size: 12px;
+    margin-bottom: 3px;
+  }
+  
+  @keyframes flip {
+    0% { transform: scaleX(1); }
+    50% { transform: scaleX(0); }
+    100% { transform: scaleX(1); }
+  }
+</style>
+
+<script>
+  export default {
+    data: {
+      gameStarted: false,
+      gameOver: false,
+      difficulty: 'easy',
+      cards: [],
+      flippedCards: [],
+      foundPairs: 0,
+      totalPairs: 4,
+      moves: 0,
+      timeElapsed: 0,
+      gameTimer: null,
+      hintAvailable: true,
+      hintsLeft: 3,
+      score: 0,
+      bestTime: 0,
+      bestMoves: 999,
+      icons: ['🍎', '🍌', '🍇', '🍊', '🍓', '🥝', '🍑', '🥭', '🍍', '🥥', '🍒', '🫐', '🍈', '🥨', '🎯', '⚽']
+    },
+    
+    onInit() {
+      this.loadBestScores();
+    },
+    
+    setDifficulty(e) {
+      if (this.gameStarted) return;
+      
+      this.difficulty = e.target.attr.dataLevel;
+      switch(this.difficulty) {
+        case 'easy':
+          this.totalPairs = 4; // 8 cartes
+          break;
+        case 'medium':
+          this.totalPairs = 6; // 12 cartes
+          break;
+        case 'hard':
+          this.totalPairs = 8; // 16 cartes
+          break;
+      }
+    },
+    
+    startGame() {
+      this.gameStarted = true;
+      this.gameOver = false;
+      this.foundPairs = 0;
+      this.moves = 0;
+      this.timeElapsed = 0;
+      this.flippedCards = [];
+      this.hintsLeft = 3;
+      this.hintAvailable = true;
+      
+      this.createCards();
+      this.startTimer();
+    },
+    
+    createCards() {
+      this.cards = [];
+      
+      // Sélectionner les icônes pour les paires
+      const selectedIcons = this.icons.slice(0, this.totalPairs);
+      
+      // Créer les paires
+      selectedIcons.forEach(icon => {
+        this.cards.push({ icon, isFlipped: false, isMatched: false });
+        this.cards.push({ icon, isFlipped: false, isMatched: false });
+      });
+      
+      // Mélanger les cartes
+      for (let i = this.cards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
+      }
+    },
+    
+    flipCard(e) {
+      if (!this.gameStarted || this.gameOver) return;
+      
+      const index = parseInt(e.target.attr.dataIndex);
+      const card = this.cards[index];
+      
+      // Ne pas retourner si déjà retournée ou trouvée
+      if (card.isFlipped || card.isMatched || this.flippedCards.length >= 2) return;
+      
+      // Retourner la carte
+      card.isFlipped = true;
+      this.flippedCards.push(index);
+      
+      // Vérifier si on a 2 cartes retournées
+      if (this.flippedCards.length === 2) {
+        this.moves++;
+        setTimeout(() => this.checkMatch(), 800);
+      }
+    },
+    
+    checkMatch() {
+      const [index1, index2] = this.flippedCards;
+      const card1 = this.cards[index1];
+      const card2 = this.cards[index2];
+      
+      if (card1.icon === card2.icon) {
+        // Paire trouvée
+        card1.isMatched = true;
+        card2.isMatched = true;
+        this.foundPairs++;
+        
+        // Vérifier si le jeu est terminé
+        if (this.foundPairs === this.totalPairs) {
+          this.endGame();
+        }
+      } else {
+        // Pas de correspondance - retourner les cartes
+        card1.isFlipped = false;
+        card2.isFlipped = false;
+      }
+      
+      this.flippedCards = [];
+    },
+    
+    showHint() {
+      if (this.hintsLeft <= 0 || !this.hintAvailable) return;
+      
+      this.hintsLeft--;
+      this.hintAvailable = false;
+      
+      // Trouver deux cartes non trouvées qui forment une paire
+      const availableCards = this.cards
+        .map((card, index) => ({ ...card, index }))
+        .filter(card => !card.isMatched && !card.isFlipped);
+      
+      // Trouver une paire
+      for (let i = 0; i < availableCards.length; i++) {
+        for (let j = i + 1; j < availableCards.length; j++) {
+          if (availableCards[i].icon === availableCards[j].icon) {
+            // Montrer cette paire brièvement
+            this.cards[availableCards[i].index].isFlipped = true;
+            this.cards[availableCards[j].index].isFlipped = true;
+            
+            setTimeout(() => {
+              this.cards[availableCards[i].index].isFlipped = false;
+              this.cards[availableCards[j].index].isFlipped = false;
+              this.hintAvailable = this.hintsLeft > 0;
+            }, 1500);
+            
+            return;
+          }
+        }
+      }
+    },
+    
+    startTimer() {
+      this.gameTimer = setInterval(() => {
+        this.timeElapsed++;
+      }, 1000);
+    },
+    
+    endGame() {
+      this.gameOver = true;
+      this.gameStarted = false;
+      
+      if (this.gameTimer) {
+        clearInterval(this.gameTimer);
+        this.gameTimer = null;
+      }
+      
+      // Calculer le score
+      this.score = Math.max(1000 - (this.moves * 10) - (this.timeElapsed * 5), 100);
+      
+      // Mettre à jour les meilleurs scores
+      this.updateBestScores();
+    },
+    
+    updateBestScores() {
+      if (this.bestTime === 0 || this.timeElapsed < this.bestTime) {
+        this.bestTime = this.timeElapsed;
+      }
+      
+      if (this.moves < this.bestMoves) {
+        this.bestMoves = this.moves;
+      }
+      
+      this.saveBestScores();
+    },
+    
+    getPerformanceText() {
+      if (this.moves <= this.totalPairs * 2) {
+        return '🌟 Performance parfaite!';
+      } else if (this.moves <= this.totalPairs * 3) {
+        return '👏 Très bien joué!';
+      } else if (this.moves <= this.totalPairs * 4) {
+        return '👍 Bien joué!';
+      } else {
+        return '💪 Continuez à vous entraîner!';
+      }
+    },
+    
+    loadBestScores() {
+      // Simuler le chargement depuis localStorage
+      this.bestTime = 0;
+      this.bestMoves = 999;
+    },
+    
+    saveBestScores() {
+      // Dans une vraie app, sauvegarder dans localStorage
+    },
+    
+    restartGame() {
+      this.startGame();
+    },
+    
+    goBack() {
+      if (this.gameTimer) {
+        clearInterval(this.gameTimer);
+      }
+      this.$app.router.back();
+    },
+    
+    onDestroy() {
+      if (this.gameTimer) {
+        clearInterval(this.gameTimer);
+      }
+    }
+  }
+</script>
